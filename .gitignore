@@ -24,8 +24,6 @@ hs_err_pid*
 
 # manual file
 Demand
+database.pdf
 config.properties
-compiler.xml
-misc.xml
-vcs.xml
-workspace.xml
+.idea/
