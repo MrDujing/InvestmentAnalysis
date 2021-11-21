@@ -26,7 +26,4 @@ hs_err_pid*
 database.pdf
 Demand
 config.properties
-compiler.xml
-misc.xml
-vcs.xml
-workspace.xml
+.idea/
