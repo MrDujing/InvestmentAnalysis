@@ -1,7 +1,7 @@
 import analysis.AssetSingleProperty;
 import javafx.util.Pair;
 import org.json.simple.parser.ParseException;
-import util.ConfigJson;
+import util.JsonConfig;
 import util.DateTransForm;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class AnalysisInvestmentData {
     public static void main(String[] args) {
         try {
-            Map<Integer, Pair<String, Float>> fundGroup = new ConfigJson(".\\src\\main\\resources\\group.json").getFundMap();
+            Map<Integer, Pair<String, Float>> fundGroup = new JsonConfig(".\\src\\main\\resources\\group.json").getGroupTarget();
             ArrayList<Pair<Integer, Float>> calculateMap = new ArrayList<>();
             for (int fundCode : fundGroup.keySet()) {
 
