@@ -9,7 +9,9 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class JsonConfig {
 
@@ -75,6 +77,34 @@ public class JsonConfig {
             System.exit(1);
         }
         return singleTarget;
+    }
+
+    /**
+     * Read RelativeAnalysis.json file, get relativeTarget.
+     *
+     * @param file filename, e.g. RelativeAnalysis.json.
+     * @return Set, first parameter: assetOne code; second parameter: assetTwo code.
+     * @Exception Read file failed, exit program; parse file failed , exit program.
+     */
+    public Set<Pair<String, String>> getRelativeTarget(String file) {
+        Set<Pair<String, String>> relativeTarget = new HashSet<>();
+        try {
+            JSONArray array = (JSONArray) new JSONParser().parse(new FileReader(file));
+            for (Object obj : array) {
+                JSONObject fund = (JSONObject) obj;
+                String assetOne = (String)fund.get("assetOne");
+                String assetTwo = (String)fund.get("assetTwo");
+
+                relativeTarget.add(new Pair<>(assetOne, assetTwo));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return relativeTarget;
     }
 
 }
