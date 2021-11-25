@@ -9,40 +9,72 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class JsonConfig {
 
-    private Map<Integer, String> SingleTarget = new HashMap<>();
-    private Set<Pair<Integer, Integer>> RelativeTarget = new HashSet<>();
-    private Map<Integer, Pair<String, Float>> GroupTarget = new HashMap<>();
-
     /**
-     * Read GroupAssetAnalysis.json, set GroupTarget.
+     * Read GroupAssetAnalysis.json.
+     *
      * @param file inputFile, e.g. GroupAssetAnalysis.json.
      * @throws ParseException parse error or proportionSum != 1, exit program.
-     * @throws IOException access file failed, exit program.
+     * @throws IOException    access file failed, exit program.
+     * @Return GroupTarget, first: proportion; second: fund name; third: fund code.
      */
-    protected boolean acquireGroupTarget(String file) {
-
-        JSONArray jsonArray = (JSONArray) new JSONParser().parse(new FileReader(file));
+    public Map<Float, Pair<String, String>> getGroupTarget(String file) {
+        Map<Float, Pair<String, String>> groupTarget = new HashMap<>();
         float proportionSum = 0;
-        for (Object obj : jsonArray) {
-            JSONObject fund = (JSONObject) obj;
-            int fundCode = Integer.parseInt((String) fund.get("fundCode"));
-            String name = (String) fund.get("name");
-            float proportion = new Float((Double)fund.get("proportion"));
-            GroupTarget.put(fundCode, new Pair(name, proportion));
-            proportionSum += proportion;
+        try {
+            JSONArray jsonArray = (JSONArray) new JSONParser().parse(new FileReader(file));
+            for (Object obj : jsonArray) {
+                JSONObject fund = (JSONObject) obj;
+                float proportion = Float.parseFloat(((String) fund.get("proportion")).split("%")[0]) / 100;
+                String code = (String) fund.get("code");
+                String name = (String) fund.get("name");
+
+                groupTarget.put(proportion, new Pair(name, code));
+                proportionSum += proportion;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
 
-        if (Math.round(proportionSum) != 1)
-            throw new ParseException(ParseException.ERROR_UNEXPECTED_CHAR);
+        if (Math.round(proportionSum) != 1) {
+            System.out.println("Sum of proportion != 100%");
+            System.exit(1);
+        }
+        return groupTarget;
     }
 
-    public Map<Integer, Pair<String, Float>> getGroupTarget() {
-        return GroupTarget;
+    /**
+     * Read SingleFeatureAnalysis.json, acquire single target.
+     *
+     * @param file input file, e.g. SingleFeatureAnalysis.json.
+     * @return first parameter: fund name; second: fund code.
+     * @Exception IOException, read file failed, exit program.
+     */
+    public Map<String, String> getSingleTarget(String file) {
+        Map<String, String> singleTarget = new HashMap<>();
+        try {
+            JSONArray array = (JSONArray) new JSONParser().parse(new FileReader(file));
+            for (Object obj : array) {
+                JSONObject fund = (JSONObject) obj;
+                String name = (String) fund.get("name");
+                String code = (String) fund.get("code");
+                singleTarget.put(name, code);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return singleTarget;
     }
+
 }
