@@ -13,7 +13,7 @@ public class LoggerRecorder {
     private static String loggerName, fileName;
 
     static {
-        Properties prop = new ConfigProperties("config.properties").getProperties();
+        Properties prop = new PropertiesConfig("config.properties").getProperties();
         loggerName = prop.getProperty("LOG_NAME");
         fileName = prop.getProperty("LOG_FILE");
     }

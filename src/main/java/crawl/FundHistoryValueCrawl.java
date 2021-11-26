@@ -27,7 +27,7 @@ public class FundHistoryValueCrawl {
         fundCode = code;
 
         //acquire lastCrawlDate.
-        Properties properties = new ConfigProperties("crawldate.properties").getProperties();
+        Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
         String crawlDateStr = properties.getProperty(FundCodeTransfer.intToString(code) + "HistoryValue");
 
         //Crawl date :[lastCrawlDate, Today).
@@ -97,7 +97,7 @@ public class FundHistoryValueCrawl {
         boolean insertFlag = new AssetHistoryValueDao().insertFundHistoryValue(fundHistoryValueArray);
         //Store lastCrawlDate to crawldate.properties.
         if (insertFlag)
-            new ConfigProperties("crawldate.properties").updateProperties(FundCodeTransfer.intToString(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
+            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.intToString(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
         else
             logger.info(String.format("Store %d history value to database failed", fundCode));
     }

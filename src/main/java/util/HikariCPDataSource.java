@@ -18,7 +18,7 @@ public class HikariCPDataSource {
     private static Properties prop;
 
     static {
-        prop = new ConfigProperties("config.properties").getProperties();
+        prop = new PropertiesConfig("config.properties").getProperties();
         config.setJdbcUrl(prop.getProperty("DB_URL"));
         config.setUsername(prop.getProperty("DB_USER"));
         config.setPassword(prop.getProperty("DB_PASSWORD"));
