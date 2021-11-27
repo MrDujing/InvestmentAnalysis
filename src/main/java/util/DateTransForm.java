@@ -46,7 +46,7 @@ public class DateTransForm {
         return dateStr;
     }
 
-    public String getYesterDayStr() {
+    public String getYesterdayStr() {
         return dateLocalDate.minusDays(1).toString();
     }
 

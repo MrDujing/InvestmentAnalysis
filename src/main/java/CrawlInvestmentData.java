@@ -10,7 +10,7 @@ import java.util.Map;
 public class CrawlInvestmentData {
     public static void main(String[] args) {
         try {
-            Map<Integer, Pair<String, Float>> fundGroup = new JsonConfig(".\\src\\main\\resources\\group.json").getGroupTarget();
+            Map<Integer, Pair<String, Float>> fundGroup = new JsonConfig().getGroupTarget();
             for (int fundCode : fundGroup.keySet()) {
                 new FundHistoryValueCrawl(fundCode).crawlFundHistory();
                 System.out.println("Crawl fund history value: " + fundGroup.get(fundCode).getKey() + "-" + fundCode);

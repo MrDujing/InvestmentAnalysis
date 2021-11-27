@@ -35,12 +35,12 @@ public class FundHistoryValueCrawl {
             lastCrawlDate = 0;
             preCrawlUrl = url + "&code=" + FundCodeTransfer.intToString(fundCode) +
                     "&sdate=" +
-                    "&edate=" + new DateTransForm().getYesterDayStr();
+                    "&edate=" + new DateTransForm().getYesterdayStr();
         } else {
             lastCrawlDate = new DateTransForm(crawlDateStr).getDateCount();
             preCrawlUrl = url + "&code=" + FundCodeTransfer.intToString(fundCode) +
                     "&sdate=" + new DateTransForm(crawlDateStr).getDateStr() +
-                    "&edate=" + new DateTransForm().getYesterDayStr();
+                    "&edate=" + new DateTransForm().getYesterdayStr();
         }
     }
 

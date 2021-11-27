@@ -12,12 +12,17 @@ public class PropertiesConfig {
      * Get properties from .properties file.
      *
      * @param file file name, correspond to resources directory.
-     * @throws IOException load file failed.
+     * @exception  IOException load file failed, system exit(1).
      */
-    public PropertiesConfig(String file) throws IOException {
+    public PropertiesConfig(String file) {
         fileName = file;
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-        properties.load(in);
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
+            properties.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 
     public Properties getProperties() {
