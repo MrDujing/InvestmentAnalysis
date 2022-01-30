@@ -25,3 +25,4 @@ hs_err_pid*
 # manual file
 Demand
 .idea/
+config.properties
