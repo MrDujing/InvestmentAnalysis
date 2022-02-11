@@ -1,6 +1,8 @@
 package util;
 
-
+/**
+ * Transfer fund code between int and String. Pay attention to fund code which prefixed with 0.
+ */
 public class FundCodeTransfer {
     private int codeInt;
     private String codeStr;

@@ -34,7 +34,7 @@ public class FundPositionCrawl {
     }
 
     public FundPositionCrawl(int code) {
-        this(ConstantParameter.FundPositionCrawlUrl, code);
+        this(ConstantParameter.FundPositionCrawlURL, code);
     }
 
     public void crawlFundPosition() throws IOException {

@@ -5,7 +5,7 @@ package form;
  */
 public class AssetHistoryValueForm {
     private int assetCode;
-    private int valueDate;//day number from 1978-01-01, which 1978-01-01 correspond to 0.
+    private int valueDate;//day number from 2000-01-01, which 2000-01-01 correspond to 0.
     private int assetProperty = 0;//Asset property, 0-Unknown;1-Fund;2-Index;3-Group.
     private float netValue;//Net value of each day, not include bonus.
     private float totalValue;//Total value, include bonus.

@@ -45,7 +45,7 @@ public class FundHistoryValueCrawl {
     }
 
     public FundHistoryValueCrawl(int code) {
-        this(ConstantParameter.HistoryValueCrawlUrl, code);
+        this(ConstantParameter.FundValueCrawlURL, code);
     }
 
     /**
