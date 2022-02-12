@@ -24,11 +24,11 @@ public class FundPositionCrawl {
 
     public FundPositionCrawl(String url, int code) {
         fundCode = code;
-        crawlUrl = url + FundCodeTransfer.intToString(fundCode) + ".html";
+        crawlUrl = url + FundCodeTransfer.transferToStr(fundCode) + ".html";
 
         //acquire lastCrawlQuarter.
         Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
-        String crawlDateStr = properties.getProperty(FundCodeTransfer.intToString(fundCode) + "FundPosition");
+        String crawlDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "FundPosition");
         if (null != crawlDateStr && new DateTransForm().getQuarterCount() == new DateTransForm(crawlDateStr).getQuarterCount())
             isCurrentQuarter = true;
     }
@@ -117,7 +117,7 @@ public class FundPositionCrawl {
             logger.info(String.format("%d fund position is zero", fundCode));
         //Store lastCrawlDate to crawldate.properties.
         if (insertFlag)
-            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.intToString(fundCode) + "FundPosition", new DateTransForm().getDateStr());
+            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "FundPosition", new DateTransForm().getDateStr());
         else
             logger.info(String.format("Don't Store %d fund position to database.", fundCode));
     }

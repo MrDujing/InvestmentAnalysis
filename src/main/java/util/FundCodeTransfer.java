@@ -4,29 +4,14 @@ package util;
  * Transfer fund code between int and String. Pay attention to fund code which prefixed with 0.
  */
 public class FundCodeTransfer {
-    private int codeInt;
-    private String codeStr;
-
-    private FundCodeTransfer() { }
-
-    public FundCodeTransfer(int code) {
-        codeInt = code;
+    public static String transferToStr(int code) {
         if (code < 100000)
-            codeStr = Integer.toString(code + 1000000).substring(1);
+            return Integer.toString(code + 1000000).substring(1);
         else
-            codeStr = Integer.toString(code);
+            return Integer.toString(code);
     }
 
-    public FundCodeTransfer(String code) {
-        codeStr = code;
-        codeInt = Integer.parseInt(code);
-    }
-
-    public int getCodeInt() {
-        return codeInt;
-    }
-
-    public String getCodeStr() {
-        return codeStr;
+    public static int transferToInt(String code) {
+        return Integer.parseInt(code);
     }
 }

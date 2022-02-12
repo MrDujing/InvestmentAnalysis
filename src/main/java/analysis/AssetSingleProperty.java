@@ -63,10 +63,10 @@ public class AssetSingleProperty {
         double[][] plotData = {date, dayIncrease};
 
         DefaultXYDataset dataSet = new DefaultXYDataset();
-        dataSet.addSeries(FundCodeTransfer.intToString(fundCode), plotData);
+        dataSet.addSeries(FundCodeTransfer.transferToStr(fundCode), plotData);
 
-        JFreeChart plotChart = ChartFactory.createScatterPlot(FundCodeTransfer.intToString(fundCode), "dateCount(D)", "dayIncreaseRate(%)", dataSet, PlotOrientation.VERTICAL, true, true, false);
-        ChartFrame plotFrame = new ChartFrame(FundCodeTransfer.intToString(fundCode) + fundName, plotChart, true);
+        JFreeChart plotChart = ChartFactory.createScatterPlot(FundCodeTransfer.transferToStr(fundCode), "dateCount(D)", "dayIncreaseRate(%)", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        ChartFrame plotFrame = new ChartFrame(FundCodeTransfer.transferToStr(fundCode) + fundName, plotChart, true);
         XYPlot xyPlot = (XYPlot) plotChart.getPlot();
         xyPlot.setBackgroundPaint(Color.white);
 
