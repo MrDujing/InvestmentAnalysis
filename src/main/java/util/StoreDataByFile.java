@@ -9,23 +9,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Vector;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Insert multi data, by MYSQL LOCAL_INFILE.
  */
 public class StoreDataByFile {
 
-    private static final Logger logger = new LoggerRecorder().getLogger();
-    private Connection conn;
+    private static final Logger logger = LoggerFactory.getLogger(StoreDataByFile.class);
+    private static final Connection conn = HikariCPDataSource.getConnection();
 
     public StoreDataByFile() {
-        try {
-            conn = HikariCPDataSource.getConnection();
-        } catch (SQLException e) {
-            logger.severe("StoreDataByFile getConnection failed");
-            e.printStackTrace();
-        }
+
     }
 
     /**

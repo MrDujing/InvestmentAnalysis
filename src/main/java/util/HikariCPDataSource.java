@@ -7,6 +7,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Read database config from config.properties.
  * Create database connection pool by Hikari.
@@ -16,9 +19,10 @@ public class HikariCPDataSource {
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
     private static Properties prop;
+    private static final Logger logger = LoggerFactory.getLogger(HikariCPDataSource.class);
 
     static {
-        prop = new PropertiesConfig("config.properties").getProperties();
+        prop = new PropertiesConfig("../config.properties").getProperties();
         config.setJdbcUrl(prop.getProperty("DB_URL"));
         config.setUsername(prop.getProperty("DB_USER"));
         config.setPassword(prop.getProperty("DB_PASSWORD"));
@@ -28,10 +32,19 @@ public class HikariCPDataSource {
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         ds = new HikariDataSource(config);
+        if (null == ds)
+            logger.error("Create {} failed", ds.toString());
     }
 
-    public static Connection getConnection() throws SQLException {
-        return ds.getConnection();
+    public static Connection getConnection() {
+        Connection con = null;
+        try {
+            con = ds.getConnection();
+        } catch (SQLException e) {
+            logger.error("{} get connection failed", ds.toString());
+            e.printStackTrace();
+        }
+        return con;
     }
 
     private HikariCPDataSource() {

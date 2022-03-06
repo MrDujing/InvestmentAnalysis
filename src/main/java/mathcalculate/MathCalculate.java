@@ -1,4 +1,4 @@
-package util;
+package mathcalculate;
 
 public class MathCalculate {
     private double[] data;

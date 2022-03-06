@@ -16,7 +16,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import util.FundCodeTransfer;
-import util.MathCalculate;
+import mathcalculate.MathCalculate;
 
 import java.awt.*;
 import java.text.DecimalFormat;
