@@ -1,6 +1,6 @@
 package dao;
 
-import form.AssetHistoryValueForm;
+import form.FundValueForm;
 import util.HikariCPDataSource;
 import util.StoreDataByFile;
 
@@ -24,13 +24,13 @@ public class AssetHistoryValueDao {
      * @param formArray ArrayList, stored all history value form.
      * @return true: all history value inserted succeed, else false.
      */
-    public boolean insertFundHistoryValue(ArrayList<AssetHistoryValueForm> formArray) {
+    public boolean insertFundHistoryValue(ArrayList<FundValueForm> formArray) {
         int allRows = formArray.size();
         StringBuilder insertSql = new StringBuilder();
         //All history value, need to be insert.
-        for (AssetHistoryValueForm form : formArray) {
-            insertSql.append(form.getAssetCode()).append("\t");
-            insertSql.append(form.getValueDate()).append("\t");
+        for (FundValueForm form : formArray) {
+            insertSql.append(form.getFundCode()).append("\t");
+            insertSql.append(form.getDate()).append("\t");
             insertSql.append(form.getAssetProperty()).append("\t");
             insertSql.append(form.getNetValue()).append("\t");
             insertSql.append(form.getTotalValue()).append("\t");
@@ -60,8 +60,8 @@ public class AssetHistoryValueDao {
      * @return query result between start and end.
      */
     public ArrayList queryFunHistoryValue(final int code, final int start, final int end) {
-        AssetHistoryValueForm historyValueForm = null;
-        ArrayList<AssetHistoryValueForm> historyValueArray = new ArrayList<>();
+        FundValueForm historyValueForm = null;
+        ArrayList<FundValueForm> historyValueArray = new ArrayList<>();
         String sql = "";
         //query by asset code.
         if (code > 0 && end > start && start >= 0) {
@@ -86,7 +86,7 @@ public class AssetHistoryValueDao {
 
         try {
             while (rs.next()) {
-                historyValueForm = new AssetHistoryValueForm(rs.getInt(1), rs.getInt(2),rs.getInt(3),
+                historyValueForm = new FundValueForm(rs.getInt(1), rs.getInt(2),rs.getInt(3),
                         rs.getFloat(4), rs.getFloat(5), rs.getFloat(6));
                 historyValueArray.add(historyValueForm);
             }

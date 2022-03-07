@@ -1,7 +1,7 @@
 package analysis;
 
 import dao.AssetHistoryValueDao;
-import form.AssetHistoryValueForm;
+import form.FundValueForm;
 import javafx.util.Pair;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class AssetSingleProperty {
-    private ArrayList<AssetHistoryValueForm> historyValueArray = new ArrayList<>();
+    private ArrayList<FundValueForm> historyValueArray = new ArrayList<>();
     private Logger logger = new LoggerRecorder().getLogger();
     private int fundCode, startDate, endDate;
     private String fundName;
@@ -54,7 +54,7 @@ public class AssetSingleProperty {
         double[] date = new double[historyValueArray.size()];
         double[] dayIncrease = new double[historyValueArray.size()];
         for (int i = 0; i < historyValueArray.size(); i++) {
-            date[i] = (double) historyValueArray.get(i).getValueDate();
+            date[i] = (double) historyValueArray.get(i).getDate();
             dayIncrease[i] = historyValueArray.get(i).getDayIncreaseRate() * 100;
         }
         double[][] plotData = {date, dayIncrease};
@@ -96,7 +96,7 @@ public class AssetSingleProperty {
         // Acquire data set for draw.
         double plusZeroToOne = 0, plusOneToTwo = 0, plusTwoToThree = 0, plusThreeToUp = 0;
         double minusZeroToOne = 0, minusOneToTwo = 0, minusTwoToThree = 0, minusThreeToUp = 0;
-        for (AssetHistoryValueForm form : historyValueArray) {
+        for (FundValueForm form : historyValueArray) {
             float rate = form.getDayIncreaseRate();
             if (0 <= rate && rate < 0.01)
                 plusZeroToOne++;
@@ -160,8 +160,8 @@ public class AssetSingleProperty {
                 preMinIndex = i;
             }
         }
-        MDDMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getValueDate(), getIndexValue(preMaxIndex)));
-        MDDMap.add(new Pair<>(historyValueArray.get(preMinIndex).getValueDate(), getIndexValue(preMinIndex)));
+        MDDMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getDate(), getIndexValue(preMaxIndex)));
+        MDDMap.add(new Pair<>(historyValueArray.get(preMinIndex).getDate(), getIndexValue(preMinIndex)));
         return MDDMap;
     }
 
@@ -179,8 +179,8 @@ public class AssetSingleProperty {
                 preMinIndex = minIndex;
             }
         }
-        MPFMap.add(new Pair<>(historyValueArray.get(preMinIndex).getValueDate(), getIndexValue(preMinIndex)));
-        MPFMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getValueDate(), getIndexValue(preMaxIndex)));
+        MPFMap.add(new Pair<>(historyValueArray.get(preMinIndex).getDate(), getIndexValue(preMinIndex)));
+        MPFMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getDate(), getIndexValue(preMaxIndex)));
         return MPFMap;
     }
 

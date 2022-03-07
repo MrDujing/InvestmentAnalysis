@@ -9,10 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger
 
 public class FundPositionDao {
-    private Logger logger = new LoggerRecorder().getLogger();
+    private Logger logger = LoggerFactory.getLogger(FundPositionDao.class);
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
@@ -27,7 +28,7 @@ public class FundPositionDao {
         String insertSql = "INSERT IGNORE INTO investment_data.fund_position (fund_code, quarter_count, asset_property, asset_code,asset_name, asset_proportion) VALUES ";
         for (int i = 0; i < positionArray.size(); i++) {
             insertSql += "(" + positionArray.get(i).getFundCode() + ","
-                    + positionArray.get(i).getQuarterCount() + ","
+                    + positionArray.get(i).getQuarter() + ","
                     + positionArray.get(i).getAssetProperty() + ","
                     + "\"" + positionArray.get(i).getAssetCode() + "\"" + ","
                     + "\"" + positionArray.get(i).getAssetName() + "\"" + ","

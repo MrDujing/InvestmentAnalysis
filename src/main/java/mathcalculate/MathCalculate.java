@@ -1,21 +1,13 @@
 package mathcalculate;
 
 public class MathCalculate {
-    private double[] data;
 
-    public MathCalculate(double[] data) {
-        this.data = data;
-    }
-
-    private double arrayMean() {
-        double sum = 0;
-        for (double d : data) {
-            sum += d;
-        }
-        return sum / data.length;
-    }
-
-    private double arrayMean(double[] data) {
+    /**
+     * Calculate mean of array.
+     * @param data
+     * @return
+     */
+    public static double arrayMean(double[] data) {
         double sum = 0;
         for (double d : data) {
             sum += d;
@@ -24,8 +16,8 @@ public class MathCalculate {
     }
 
     //Calculate population standard deviation.
-    public double popSTDEV() {
-        double mean = arrayMean();
+    public static double popSTDEV(double[] data) {
+        double mean = arrayMean(data);
         double variance = 0;
         for (int i = 0; i < data.length; i++) {
             variance += Math.pow((data[i] - mean), 2);
@@ -35,28 +27,28 @@ public class MathCalculate {
     }
 
     /**
-     * Calculate Pearson correlation score.
-     *
-     * @param y , another array; data[] is x.
-     * @return Pearson correlation rate.
+     * Calculate pearson correlation of array x and array y.
+     * @param x
+     * @param y
+     * @return pearson correlation.
      * @throws IndexOutOfBoundsException
      */
-    public double calPearsonCorrelation(double[] y) throws IndexOutOfBoundsException {
-        if (data.length != y.length)
+    public static double calPearsonCorrelation(double[] x, double[] y) throws IndexOutOfBoundsException {
+        if (x.length != y.length)
             throw new IndexOutOfBoundsException("Size of two array is not equal!");
         if (y.length == 0)
             throw new IndexOutOfBoundsException("zero array");
-        double xMean = arrayMean(), yMean = arrayMean(y);
-        int count = data.length;
+        double xMean = arrayMean(x), yMean = arrayMean(y);
+        int count = x.length;
         //Calculate pearson numerator.
         double pearsonNumerator = 0;
         for (int i = 0; i < count; i++) {
-            pearsonNumerator += (data[i] - xMean) * (y[i] - yMean);
+            pearsonNumerator += (x[i] - xMean) * (y[i] - yMean);
         }
         //Calculate pearson denominator.
         double xSquareSum = 0, ySquareSum = 0;
         for (int i = 0; i < count; i++) {
-            xSquareSum += Math.pow(data[i]-xMean, 2);
+            xSquareSum += Math.pow(x[i]-xMean, 2);
             ySquareSum += Math.pow(y[i]-yMean, 2);
         }
 

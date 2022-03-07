@@ -1,7 +1,7 @@
 package crawl;
 
 import dao.AssetHistoryValueDao;
-import form.AssetHistoryValueForm;
+import form.FundValueForm;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class FundHistoryValueCrawl {
     private Logger logger = new LoggerRecorder().getLogger();
-    public ArrayList<AssetHistoryValueForm> fundHistoryValueArray = new ArrayList<>();
+    public ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
     private int lastCrawlDate;//Crawl fund history value: [lastCrawlDate, now).
     private String preCrawlUrl;
     private int fundCode;
@@ -89,7 +89,7 @@ public class FundHistoryValueCrawl {
                     totalValue = Float.parseFloat(row.child(2).text());
                 String dayIncreaseRateStr = row.child(3).text();
                 float dayIncreaseRate = (!dayIncreaseRateStr.contains("%")) ? 0 : Float.parseFloat(dayIncreaseRateStr.split("%")[0]) / 100;
-                fundHistoryValueArray.add(new AssetHistoryValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
+                fundHistoryValueArray.add(new FundValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
             }
         } while (totalPages > currentPage++);
 
