@@ -47,6 +47,10 @@ public class HikariCPDataSource {
         return con;
     }
 
+    public static String getDatabaseName() {
+        return prop.getProperty("DB_NAME");
+    }
+
     private HikariCPDataSource() {
     }
 }

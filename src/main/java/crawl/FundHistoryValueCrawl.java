@@ -1,6 +1,6 @@
 package crawl;
 
-import dao.AssetHistoryValueDao;
+import dao.FundValueDao;
 import form.FundValueForm;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -94,7 +94,7 @@ public class FundHistoryValueCrawl {
         } while (totalPages > currentPage++);
 
         //Store history value to database.
-        boolean insertFlag = new AssetHistoryValueDao().insertFundHistoryValue(fundHistoryValueArray);
+        boolean insertFlag = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
         //Store lastCrawlDate to crawldate.properties.
         if (insertFlag)
             new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", new DateTransForm().getDateStr());

@@ -20,6 +20,7 @@ public class StoreDataByFile {
 
     private static final Logger logger = LoggerFactory.getLogger(StoreDataByFile.class);
     private static final Connection conn = HikariCPDataSource.getConnection();
+    private static final String databaseName = HikariCPDataSource.getDatabaseName();
 
     public StoreDataByFile() {
 
@@ -66,15 +67,14 @@ public class StoreDataByFile {
     /**
      * call to insertFundHistoryValue multiple data.
      *
-     * @param dataBaseName     database
      * @param tableName        table which to insertFundHistoryValue
      * @param tableColumns     columns which to insertFundHistoryValue
      * @param tableColumnValue all data to insertFundHistoryValue
      */
-    public int insertMultipleData(String dataBaseName, String tableName, Vector<String> tableColumns, StringBuilder tableColumnValue) {
+    public int insertMultipleData(String tableName, Vector<String> tableColumns, StringBuilder tableColumnValue) {
         //join insertFundHistoryValue sql
         String insertColumnName = StringUtils.join(tableColumns, ",");
-        String insertSql = "LOAD DATA LOCAL INFILE 'sql.csv' INTO TABLE " + dataBaseName + "." + tableName + " (" + insertColumnName + ")";
+        String insertSql = "LOAD DATA LOCAL INFILE 'sql.csv' INTO TABLE " + databaseName + "." + tableName + " (" + insertColumnName + ")";
 
         int succeedInsertRows = fastInsertData(insertSql, tableColumnValue);
         return succeedInsertRows;

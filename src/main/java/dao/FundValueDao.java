@@ -10,10 +10,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Vector;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
-public class AssetHistoryValueDao {
-    private Logger logger = new LoggerRecorder().getLogger();
+public class FundValueDao {
+    private Logger logger = LoggerFactory.getLogger(FundValueDao.class);
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
@@ -21,33 +22,31 @@ public class AssetHistoryValueDao {
     /**
      * insert history value of asset.
      *
-     * @param formArray ArrayList, stored all history value form.
+     * @param valueArray ArrayList, stored all history value form.
      * @return true: all history value inserted succeed, else false.
      */
-    public boolean insertFundHistoryValue(ArrayList<FundValueForm> formArray) {
-        int allRows = formArray.size();
-        StringBuilder insertSql = new StringBuilder();
+    public boolean insertFundHistoryValue(ArrayList<FundValueForm> valueArray) {
+        int allCount = valueArray.size();
+        StringBuilder insertValue = new StringBuilder();
         //All history value, need to be insert.
-        for (FundValueForm form : formArray) {
-            insertSql.append(form.getFundCode()).append("\t");
-            insertSql.append(form.getDate()).append("\t");
-            insertSql.append(form.getAssetProperty()).append("\t");
-            insertSql.append(form.getNetValue()).append("\t");
-            insertSql.append(form.getTotalValue()).append("\t");
-            insertSql.append(form.getDayIncreaseRate()).append("\n");
+        for (FundValueForm value : valueArray) {
+            insertValue.append(value.getFundCode()).append("\t");
+            insertValue.append(value.getDate()).append("\t");
+            insertValue.append(value.getNetValue()).append("\t");
+            insertValue.append(value.getTotalValue()).append("\t");
+            insertValue.append(value.getDayIncreaseRate()).append("\n");
         }
 
         //sql table columns.
         Vector<String> tableColumn = new Vector<>();
-        tableColumn.add("asset_code");
-        tableColumn.add("value_date");
-        tableColumn.add("asset_property");
+        tableColumn.add("fund_code");
+        tableColumn.add("date");
         tableColumn.add("net_value");
         tableColumn.add("total_value");
         tableColumn.add("day_increase_rate");
 
-        int succeedInsertRows = new StoreDataByFile().insertMultipleData("investment_data", "asset_history_value", tableColumn, insertSql);
-        return (succeedInsertRows == allRows) ? true : false;
+        int succeedInsertRows = new StoreDataByFile().insertMultipleData("asset_history_value", tableColumn, insertValue);
+        return (succeedInsertRows == allCount) ? true : false;
     }
 
     /**
@@ -72,7 +71,7 @@ public class AssetHistoryValueDao {
             sql = "SELECT * FROM asset_history_value h WHERE h.asset_code = " + code + " AND h.day_increase_rate <> 0"
                     + " ORDER BY h.value_date";
         } else {
-            logger.info("AssetHistoryValueDao.queryFunHistoryValue failed");
+            logger.info("FundValueDao.queryFunHistoryValue failed");
         }
 
         try {
@@ -80,7 +79,7 @@ public class AssetHistoryValueDao {
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = stmt.executeQuery(sql);
         } catch (SQLException e) {
-            logger.severe("AssetHistoryValueDao.queryFunHistoryValue, sql connection failed");
+            logger.severe("FundValueDao.queryFunHistoryValue, sql connection failed");
             e.printStackTrace();
         }
 
@@ -91,7 +90,7 @@ public class AssetHistoryValueDao {
                 historyValueArray.add(historyValueForm);
             }
         } catch (SQLException e) {
-            logger.severe("AssetHistoryValueDao.queryFunHistoryValue, ResultSet.next failed");
+            logger.severe("FundValueDao.queryFunHistoryValue, ResultSet.next failed");
             e.printStackTrace();
         } finally {
             try {
@@ -99,7 +98,7 @@ public class AssetHistoryValueDao {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                logger.severe("AssetHistoryValueDao.queryFunHistoryValue, close failed");
+                logger.severe("FundValueDao.queryFunHistoryValue, close failed");
                 e.printStackTrace();
             }
         }

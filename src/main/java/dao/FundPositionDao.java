@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger
+import org.slf4j.Logger;
 
 public class FundPositionDao {
     private Logger logger = LoggerFactory.getLogger(FundPositionDao.class);

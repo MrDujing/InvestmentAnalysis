@@ -1,6 +1,6 @@
 package analysis;
 
-import dao.AssetHistoryValueDao;
+import dao.FundValueDao;
 import form.FundValueForm;
 import javafx.util.Pair;
 import org.jfree.chart.ChartFactory;
@@ -36,9 +36,9 @@ public class AssetSingleProperty {
         startDate = start;
         endDate = end;
         if (endDate > startDate && startDate >= 0) {
-            historyValueArray = new AssetHistoryValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
+            historyValueArray = new FundValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
         } else if (endDate <= 0) {
-            historyValueArray = new AssetHistoryValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
+            historyValueArray = new FundValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
         } else {
             logger.severe(String.format("Invalid input for %d", fundCode));
         }
