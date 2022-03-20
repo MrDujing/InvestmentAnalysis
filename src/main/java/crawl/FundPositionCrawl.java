@@ -11,30 +11,30 @@ import util.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class FundPositionCrawl {
-    private Logger logger = new LoggerRecorder().getLogger();
+    private Logger logger = LoggerFactory.getLogger(FundPositionCrawl.class);
     private ArrayList<FundPositionForm> positionFormArray = new ArrayList<>();
-    private boolean isCurrentQuarter = false;//Crawl fund position only if last crawl quarter is not current quarter.
     private String crawlUrl;
     private int fundCode;
 
     public FundPositionCrawl(String url, int code) {
         fundCode = code;
-        crawlUrl = url + FundCodeTransfer.intToString(fundCode) + ".html";
+        crawlUrl = url + FundCodeTransfer.transferToStr(fundCode) + ".html";
 
         //acquire lastCrawlQuarter.
         Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
-        String crawlDateStr = properties.getProperty(FundCodeTransfer.intToString(fundCode) + "FundPosition");
+        String crawlDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "FundPosition");
         if (null != crawlDateStr && new DateTransForm().getQuarterCount() == new DateTransForm(crawlDateStr).getQuarterCount())
             isCurrentQuarter = true;
     }
 
     public FundPositionCrawl(int code) {
-        this(ConstantParameter.FundPositionCrawlUrl, code);
+        this(ConstantParameter.FundPositionCrawlURL, code);
     }
 
     public void crawlFundPosition() throws IOException {
@@ -117,7 +117,7 @@ public class FundPositionCrawl {
             logger.info(String.format("%d fund position is zero", fundCode));
         //Store lastCrawlDate to crawldate.properties.
         if (insertFlag)
-            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.intToString(fundCode) + "FundPosition", new DateTransForm().getDateStr());
+            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "FundPosition", new DateTransForm().getDateStr());
         else
             logger.info(String.format("Don't Store %d fund position to database.", fundCode));
     }

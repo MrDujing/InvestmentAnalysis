@@ -1,7 +1,7 @@
 package crawl;
 
-import dao.AssetHistoryValueDao;
-import form.AssetHistoryValueForm;
+import dao.FundValueDao;
+import form.FundValueForm;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,36 +16,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class FundHistoryValueCrawl {
+public class FundValueCrawl {
     private Logger logger = new LoggerRecorder().getLogger();
-    public ArrayList<AssetHistoryValueForm> fundHistoryValueArray = new ArrayList<>();
+    public ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
     private int lastCrawlDate;//Crawl fund history value: [lastCrawlDate, now).
     private String preCrawlUrl;
     private int fundCode;
 
-    public FundHistoryValueCrawl(String url, int code) {
+    public FundValueCrawl(String url, int code) {
         fundCode = code;
 
         //acquire lastCrawlDate.
         Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
-        String crawlDateStr = properties.getProperty(FundCodeTransfer.intToString(code) + "HistoryValue");
+        String crawlDateStr = properties.getProperty(FundCodeTransfer.transferToStr(code) + "HistoryValue");
 
         //Crawl date :[lastCrawlDate, Today).
         if (null == crawlDateStr) {
             lastCrawlDate = 0;
-            preCrawlUrl = url + "&code=" + FundCodeTransfer.intToString(fundCode) +
+            preCrawlUrl = url + "&code=" + FundCodeTransfer.transferToStr(fundCode) +
                     "&sdate=" +
                     "&edate=" + new DateTransForm().getYesterdayStr();
         } else {
             lastCrawlDate = new DateTransForm(crawlDateStr).getDateCount();
-            preCrawlUrl = url + "&code=" + FundCodeTransfer.intToString(fundCode) +
+            preCrawlUrl = url + "&code=" + FundCodeTransfer.transferToStr(fundCode) +
                     "&sdate=" + new DateTransForm(crawlDateStr).getDateStr() +
                     "&edate=" + new DateTransForm().getYesterdayStr();
         }
     }
 
-    public FundHistoryValueCrawl(int code) {
-        this(ConstantParameter.HistoryValueCrawlUrl, code);
+    public FundValueCrawl(int code) {
+        this(ConstantParameter.FundValueCrawlURL, code);
     }
 
     /**
@@ -89,15 +89,15 @@ public class FundHistoryValueCrawl {
                     totalValue = Float.parseFloat(row.child(2).text());
                 String dayIncreaseRateStr = row.child(3).text();
                 float dayIncreaseRate = (!dayIncreaseRateStr.contains("%")) ? 0 : Float.parseFloat(dayIncreaseRateStr.split("%")[0]) / 100;
-                fundHistoryValueArray.add(new AssetHistoryValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
+                fundHistoryValueArray.add(new FundValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
             }
         } while (totalPages > currentPage++);
 
         //Store history value to database.
-        boolean insertFlag = new AssetHistoryValueDao().insertFundHistoryValue(fundHistoryValueArray);
+        boolean insertFlag = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
         //Store lastCrawlDate to crawldate.properties.
         if (insertFlag)
-            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.intToString(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
+            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
         else
             logger.info(String.format("Store %d history value to database failed", fundCode));
     }

@@ -1,7 +1,7 @@
 package analysis;
 
-import dao.AssetHistoryValueDao;
-import form.AssetHistoryValueForm;
+import dao.FundValueDao;
+import form.FundValueForm;
 import javafx.util.Pair;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
@@ -16,19 +16,16 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import util.FundCodeTransfer;
-import util.LoggerRecorder;
-import util.MathCalculate;
+import mathcalculate.MathCalculate;
 
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class AssetSingleProperty {
-    private ArrayList<AssetHistoryValueForm> historyValueArray = new ArrayList<>();
+    private ArrayList<FundValueForm> historyValueArray = new ArrayList<>();
     private Logger logger = new LoggerRecorder().getLogger();
     private int fundCode, startDate, endDate;
     private String fundName;
@@ -39,9 +36,9 @@ public class AssetSingleProperty {
         startDate = start;
         endDate = end;
         if (endDate > startDate && startDate >= 0) {
-            historyValueArray = new AssetHistoryValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
+            historyValueArray = new FundValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
         } else if (endDate <= 0) {
-            historyValueArray = new AssetHistoryValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
+            historyValueArray = new FundValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
         } else {
             logger.severe(String.format("Invalid input for %d", fundCode));
         }
@@ -57,16 +54,16 @@ public class AssetSingleProperty {
         double[] date = new double[historyValueArray.size()];
         double[] dayIncrease = new double[historyValueArray.size()];
         for (int i = 0; i < historyValueArray.size(); i++) {
-            date[i] = (double) historyValueArray.get(i).getValueDate();
+            date[i] = (double) historyValueArray.get(i).getDate();
             dayIncrease[i] = historyValueArray.get(i).getDayIncreaseRate() * 100;
         }
         double[][] plotData = {date, dayIncrease};
 
         DefaultXYDataset dataSet = new DefaultXYDataset();
-        dataSet.addSeries(FundCodeTransfer.intToString(fundCode), plotData);
+        dataSet.addSeries(FundCodeTransfer.transferToStr(fundCode), plotData);
 
-        JFreeChart plotChart = ChartFactory.createScatterPlot(FundCodeTransfer.intToString(fundCode), "dateCount(D)", "dayIncreaseRate(%)", dataSet, PlotOrientation.VERTICAL, true, true, false);
-        ChartFrame plotFrame = new ChartFrame(FundCodeTransfer.intToString(fundCode) + fundName, plotChart, true);
+        JFreeChart plotChart = ChartFactory.createScatterPlot(FundCodeTransfer.transferToStr(fundCode), "dateCount(D)", "dayIncreaseRate(%)", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        ChartFrame plotFrame = new ChartFrame(FundCodeTransfer.transferToStr(fundCode) + fundName, plotChart, true);
         XYPlot xyPlot = (XYPlot) plotChart.getPlot();
         xyPlot.setBackgroundPaint(Color.white);
 
@@ -99,7 +96,7 @@ public class AssetSingleProperty {
         // Acquire data set for draw.
         double plusZeroToOne = 0, plusOneToTwo = 0, plusTwoToThree = 0, plusThreeToUp = 0;
         double minusZeroToOne = 0, minusOneToTwo = 0, minusTwoToThree = 0, minusThreeToUp = 0;
-        for (AssetHistoryValueForm form : historyValueArray) {
+        for (FundValueForm form : historyValueArray) {
             float rate = form.getDayIncreaseRate();
             if (0 <= rate && rate < 0.01)
                 plusZeroToOne++;
@@ -163,8 +160,8 @@ public class AssetSingleProperty {
                 preMinIndex = i;
             }
         }
-        MDDMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getValueDate(), getIndexValue(preMaxIndex)));
-        MDDMap.add(new Pair<>(historyValueArray.get(preMinIndex).getValueDate(), getIndexValue(preMinIndex)));
+        MDDMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getDate(), getIndexValue(preMaxIndex)));
+        MDDMap.add(new Pair<>(historyValueArray.get(preMinIndex).getDate(), getIndexValue(preMinIndex)));
         return MDDMap;
     }
 
@@ -182,8 +179,8 @@ public class AssetSingleProperty {
                 preMinIndex = minIndex;
             }
         }
-        MPFMap.add(new Pair<>(historyValueArray.get(preMinIndex).getValueDate(), getIndexValue(preMinIndex)));
-        MPFMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getValueDate(), getIndexValue(preMaxIndex)));
+        MPFMap.add(new Pair<>(historyValueArray.get(preMinIndex).getDate(), getIndexValue(preMinIndex)));
+        MPFMap.add(new Pair<>(historyValueArray.get(preMaxIndex).getDate(), getIndexValue(preMaxIndex)));
         return MPFMap;
     }
 
