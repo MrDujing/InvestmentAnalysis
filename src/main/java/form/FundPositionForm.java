@@ -11,9 +11,9 @@ public class FundPositionForm {
     //Forbid default constructor, form must be assigned explicitly.
     private FundPositionForm() {}
 
-    public FundPositionForm(int code, int date, byte property, String assetCode, String name, float proportion) {
+    public FundPositionForm(int code, int quarter, byte property, String assetCode, String name, float proportion) {
         fundCode = code;
-        quarter = date;
+        this.quarter = quarter;
         assetProperty = property;
         this.assetCode = assetCode;
         assetName = name;

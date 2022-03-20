@@ -74,10 +74,9 @@ public class StoreDataByFile {
     public int insertMultipleData(String tableName, Vector<String> tableColumns, StringBuilder tableColumnValue) {
         //join insertFundHistoryValue sql
         String insertColumnName = StringUtils.join(tableColumns, ",");
-        String insertSql = "LOAD DATA LOCAL INFILE 'sql.csv' INTO TABLE " + databaseName + "." + tableName + " (" + insertColumnName + ")";
+        String insertSql = "LOAD DATA LOCAL INFILE 'sql.csv' IGNORE INTO TABLE " + databaseName + "." + tableName + " (" + insertColumnName + ")";
 
-        int succeedInsertRows = fastInsertData(insertSql, tableColumnValue);
-        return succeedInsertRows;
+        return fastInsertData(insertSql, tableColumnValue);
     }
 }
 

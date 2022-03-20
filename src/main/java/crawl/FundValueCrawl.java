@@ -16,14 +16,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class FundHistoryValueCrawl {
+public class FundValueCrawl {
     private Logger logger = new LoggerRecorder().getLogger();
     public ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
     private int lastCrawlDate;//Crawl fund history value: [lastCrawlDate, now).
     private String preCrawlUrl;
     private int fundCode;
 
-    public FundHistoryValueCrawl(String url, int code) {
+    public FundValueCrawl(String url, int code) {
         fundCode = code;
 
         //acquire lastCrawlDate.
@@ -44,7 +44,7 @@ public class FundHistoryValueCrawl {
         }
     }
 
-    public FundHistoryValueCrawl(int code) {
+    public FundValueCrawl(int code) {
         this(ConstantParameter.FundValueCrawlURL, code);
     }
 

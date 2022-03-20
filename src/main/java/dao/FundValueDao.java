@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Vector;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -23,10 +24,9 @@ public class FundValueDao {
      * insert history value of asset.
      *
      * @param valueArray ArrayList, stored all history value form.
-     * @return true: all history value inserted succeed, else false.
+     * @return insert rows.
      */
-    public boolean insertFundHistoryValue(ArrayList<FundValueForm> valueArray) {
-        int allCount = valueArray.size();
+    public int insertFundHistoryValue(ArrayList<FundValueForm> valueArray) {
         StringBuilder insertValue = new StringBuilder();
         //All history value, need to be insert.
         for (FundValueForm value : valueArray) {
@@ -45,52 +45,49 @@ public class FundValueDao {
         tableColumn.add("total_value");
         tableColumn.add("day_increase_rate");
 
-        int succeedInsertRows = new StoreDataByFile().insertMultipleData("asset_history_value", tableColumn, insertValue);
-        return (succeedInsertRows == allCount) ? true : false;
+        int succeedInsertRows = new StoreDataByFile().insertMultipleData("fund_value", tableColumn, insertValue);
+        return succeedInsertRows;
     }
 
     /**
      * query database, retrieve history value from start to end.
      * start date is inclusive, and end data is exclusive.
+     * It means no day_increase_rate if day_increase_rate equal to 999,
+     * so the sql cull it.
      *
      * @param code  asset code
      * @param start start date, include
-     * @param end   end date, exclude, if end <= 0, retrieve all date.
+     * @param end   end date, exclude.
      * @return query result between start and end.
      */
     public ArrayList queryFunHistoryValue(final int code, final int start, final int end) {
-        FundValueForm historyValueForm = null;
-        ArrayList<FundValueForm> historyValueArray = new ArrayList<>();
+        FundValueForm fundValueForm = null;
+        ArrayList<FundValueForm> fundValueArray = new ArrayList<>();
         String sql = "";
         //query by asset code.
         if (code > 0 && end > start && start >= 0) {
-            sql = "SELECT * FROM asset_history_value h WHERE h.asset_code = " + code + " AND h.day_increase_rate <> 0"
-                    + " AND h.value_date BETWEEN " + start + " AND " + (end - 1)
-                    + " ORDER BY h.value_date";
-        } else if (code > 0 && end <= 0) {
-            sql = "SELECT * FROM asset_history_value h WHERE h.asset_code = " + code + " AND h.day_increase_rate <> 0"
-                    + " ORDER BY h.value_date";
-        } else {
-            logger.info("FundValueDao.queryFunHistoryValue failed");
-        }
+            sql = "SELECT * FROM investment_data.fund_value h WHERE h.fund_code = " + code + " AND h.day_increase_rate <> 999"
+                    + " AND h.date BETWEEN " + start + " AND " + (end - 1)
+                    + " ORDER BY h.date";
+        } else return null;
 
         try {
             conn = HikariCPDataSource.getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = stmt.executeQuery(sql);
         } catch (SQLException e) {
-            logger.severe("FundValueDao.queryFunHistoryValue, sql connection failed");
+            logger.error("FundValueDao.queryFunHistoryValue, sql connection failed");
             e.printStackTrace();
         }
 
         try {
             while (rs.next()) {
-                historyValueForm = new FundValueForm(rs.getInt(1), rs.getInt(2),rs.getInt(3),
-                        rs.getFloat(4), rs.getFloat(5), rs.getFloat(6));
-                historyValueArray.add(historyValueForm);
+                fundValueForm = new FundValueForm(rs.getInt("fund_code"), rs.getInt("date"), rs.getFloat("net_value"),
+                        rs.getFloat("total_value"), rs.getFloat("day_increase_rate"));
+                fundValueArray.add(fundValueForm);
             }
         } catch (SQLException e) {
-            logger.severe("FundValueDao.queryFunHistoryValue, ResultSet.next failed");
+            logger.error("FundValueDao.queryFunHistoryValue, ResultSet.next failed");
             e.printStackTrace();
         } finally {
             try {
@@ -98,10 +95,10 @@ public class FundValueDao {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                logger.severe("FundValueDao.queryFunHistoryValue, close failed");
+                logger.error("FundValueDao.queryFunHistoryValue, close failed");
                 e.printStackTrace();
             }
         }
-        return historyValueArray;
+        return fundValueArray;
     }
 }

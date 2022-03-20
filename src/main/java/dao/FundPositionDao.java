@@ -22,10 +22,10 @@ public class FundPositionDao {
      * Insert fund position to database.
      *
      * @param positionArray stored all position of fund.
-     * @return true while insert successfully, otherwise false.
+     * @return insert rows, -1 : insert failed; else insert right. With statement IGNORE INTO, insert row may less than array size;
      */
-    public boolean insertFundPosition(ArrayList<FundPositionForm> positionArray) {
-        String insertSql = "INSERT IGNORE INTO investment_data.fund_position (fund_code, quarter_count, asset_property, asset_code,asset_name, asset_proportion) VALUES ";
+    public int insertFundPosition(ArrayList<FundPositionForm> positionArray) {
+        String insertSql = "INSERT IGNORE INTO investment_data.fund_position (fund_code, quarter, asset_property, asset_code,asset_name, asset_proportion) VALUES ";
         for (int i = 0; i < positionArray.size(); i++) {
             insertSql += "(" + positionArray.get(i).getFundCode() + ","
                     + positionArray.get(i).getQuarter() + ","
@@ -39,55 +39,54 @@ public class FundPositionDao {
                 insertSql += ",";
         }
 
-        int insertCount = 0;
+        int insertCount = -1;
         try {
             conn = HikariCPDataSource.getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             insertCount = stmt.executeUpdate(insertSql);
         } catch (SQLException e) {
-            logger.severe("FundPositionDao.insertFundPosition, sql connection failed");
+            logger.error("FundPositionDao.insertFundPosition, sql connection failed");
             e.printStackTrace();
         } finally {
             try {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                logger.severe("FundPositionDao.insertFundPosition, close failed");
+                logger.error("FundPositionDao.insertFundPosition, close failed");
                 e.printStackTrace();
             }
         }
 
-        return insertCount == positionArray.size();
+        return insertCount;
     }
 
     /**
      * Query fund position, in current quarter.
      *
-     * @return ArrtyList stored fund position.
+     * @return ArrayList stored fund position.
      */
-    public ArrayList queryFundPosition(final int fundCode) {
+    public ArrayList queryFundPosition(final int fundCode, final int quarter) {
         FundPositionForm positionForm = null;
         ArrayList<FundPositionForm> positionArray = new ArrayList<>();
-        int currentQuarterCount = new DateTransForm().getQuarterCount();
-        String querySql = "SELECT * FROM fund_position p WHERE p.fund_code = " + fundCode + " AND p.quarter_count = " + currentQuarterCount;
+        String querySql = "SELECT * FROM investment_data.fund_position p WHERE p.fund_code = " + fundCode + " AND p.quarter = " + quarter;
 
         try {
             conn = HikariCPDataSource.getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = stmt.executeQuery(querySql);
         } catch (SQLException e) {
-            logger.severe("FundPositionDao.queryFundPosition, sql connection failed");
+            logger.error("FundPositionDao.queryFundPosition, sql connection failed");
             e.printStackTrace();
         }
 
         try {
             while (rs.next()) {
-                positionForm = new FundPositionForm(rs.getInt(1), rs.getInt(2), rs.getInt(3),
-                        rs.getString(4), rs.getString(5), rs.getFloat(6));
+                positionForm = new FundPositionForm(rs.getInt("fund_code"), rs.getInt("quarter"), rs.getByte("asset_property"),
+                        rs.getString("asset_code"), rs.getString("asset_name"), rs.getFloat("asset_proportion"));
                 positionArray.add(positionForm);
             }
         } catch (SQLException e) {
-            logger.severe("FundPositionDao.queryFundPosition, ResultSet.next failed");
+            logger.error("FundPositionDao.queryFundPosition, ResultSet.next failed");
             e.printStackTrace();
         } finally {
             try {
@@ -95,7 +94,7 @@ public class FundPositionDao {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                logger.severe("FundPositionDao.queryFundPosition, close failed");
+                logger.error("FundPositionDao.queryFundPosition, close failed");
                 e.printStackTrace();
             }
         }

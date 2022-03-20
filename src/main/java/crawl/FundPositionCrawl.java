@@ -11,14 +11,14 @@ import util.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class FundPositionCrawl {
-    private Logger logger = new LoggerRecorder().getLogger();
+    private Logger logger = LoggerFactory.getLogger(FundPositionCrawl.class);
     private ArrayList<FundPositionForm> positionFormArray = new ArrayList<>();
-    private boolean isCurrentQuarter = false;//Crawl fund position only if last crawl quarter is not current quarter.
     private String crawlUrl;
     private int fundCode;
 
