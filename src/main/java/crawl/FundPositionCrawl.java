@@ -17,24 +17,25 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 public class FundPositionCrawl {
+
     private Logger logger = LoggerFactory.getLogger(FundPositionCrawl.class);
     private ArrayList<FundPositionForm> positionFormArray = new ArrayList<>();
     private String crawlUrl;
     private int fundCode;
 
-    public FundPositionCrawl(String url, int code) {
+    /**
+     * Prefix of crawl url is https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&topline=30.
+     * @param code
+     */
+    public FundPositionCrawl(int code) {
         fundCode = code;
-        crawlUrl = url + FundCodeTransfer.transferToStr(fundCode) + ".html";
+        crawlUrl = ConstantParameter.POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode)) ;
 
         //acquire lastCrawlQuarter.
         Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
         String crawlDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "FundPosition");
         if (null != crawlDateStr && new DateTransForm().getQuarterCount() == new DateTransForm(crawlDateStr).getQuarterCount())
             isCurrentQuarter = true;
-    }
-
-    public FundPositionCrawl(int code) {
-        this(ConstantParameter.FundPositionCrawlURL, code);
     }
 
     public void crawlFundPosition() throws IOException {

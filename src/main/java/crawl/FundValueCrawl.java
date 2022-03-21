@@ -45,7 +45,7 @@ public class FundValueCrawl {
     }
 
     public FundValueCrawl(int code) {
-        this(ConstantParameter.FundValueCrawlURL, code);
+        this(ConstantParameter.VALUE_CRAWL_URL_PREFIX, code);
     }
 
     /**
