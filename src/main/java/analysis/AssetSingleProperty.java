@@ -22,11 +22,12 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class AssetSingleProperty {
     private ArrayList<FundValueForm> historyValueArray = new ArrayList<>();
-    private Logger logger = new LoggerRecorder().getLogger();
+    private Logger logger = LoggerFactory.getLogger(AssetSingleProperty.class);
     private int fundCode, startDate, endDate;
     private String fundName;
 
@@ -40,7 +41,7 @@ public class AssetSingleProperty {
         } else if (endDate <= 0) {
             historyValueArray = new FundValueDao().queryFunHistoryValue(fundCode, startDate, endDate);
         } else {
-            logger.severe(String.format("Invalid input for %d", fundCode));
+            logger.info(String.format("Invalid input for %d", fundCode));
         }
     }
 
@@ -201,6 +202,7 @@ public class AssetSingleProperty {
             proportionArray[i] = historyValueArray.get(i).getDayIncreaseRate();
         }
 
-        return new MathCalculate(proportionArray).popSTDEV();
+        //return new MathCalculate(proportionArray).popSTDEV();
+        return 111;
     }
 }

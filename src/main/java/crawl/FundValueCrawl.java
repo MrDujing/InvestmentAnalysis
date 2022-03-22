@@ -11,13 +11,14 @@ import util.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 
 public class FundValueCrawl {
-    private Logger logger = new LoggerRecorder().getLogger();
+    private Logger logger = LoggerFactory.getLogger(FundValueCrawl.class);
     public ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
     private int lastCrawlDate;//Crawl fund history value: [lastCrawlDate, now).
     private String preCrawlUrl;
@@ -89,15 +90,15 @@ public class FundValueCrawl {
                     totalValue = Float.parseFloat(row.child(2).text());
                 String dayIncreaseRateStr = row.child(3).text();
                 float dayIncreaseRate = (!dayIncreaseRateStr.contains("%")) ? 0 : Float.parseFloat(dayIncreaseRateStr.split("%")[0]) / 100;
-                fundHistoryValueArray.add(new FundValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
+               // fundHistoryValueArray.add(new FundValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
             }
         } while (totalPages > currentPage++);
 
         //Store history value to database.
-        boolean insertFlag = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
+       // boolean insertFlag = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
         //Store lastCrawlDate to crawldate.properties.
-        if (insertFlag)
-            new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
+        if (false);
+           // new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
         else
             logger.info(String.format("Store %d history value to database failed", fundCode));
     }
