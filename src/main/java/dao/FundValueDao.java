@@ -1,6 +1,7 @@
 package dao;
 
 import form.FundValueForm;
+import util.ConstantParameter;
 import util.HikariCPDataSource;
 import util.StoreDataByFile;
 
@@ -66,7 +67,8 @@ public class FundValueDao {
         String sql = "";
         //query by asset code.
         if (code > 0 && end > start && start >= 0) {
-            sql = "SELECT * FROM investment_data.fund_value h WHERE h.fund_code = " + code + " AND h.day_increase_rate <> 999"
+            sql = "SELECT * FROM investment_data.fund_value h WHERE h.fund_code = " + code + " AND h.day_increase_rate <> " +
+                    ConstantParameter.RATE_INVALID
                     + " AND h.date BETWEEN " + start + " AND " + (end - 1)
                     + " ORDER BY h.date";
         } else return null;

@@ -1,6 +1,6 @@
 [主要步骤]
 1 创建数据库investment_data,表空间的创建使用investment_data.sql文件
-2 配置改动：src/main/resources/config.properties:数据库的配置文件
+2 配置改动：src/Test/resources/config.properties:数据库的配置文件
 3 input/SingleFeatureAnalysis.json：若单独分析每只基金，则输入基金内容
 4 input/GroupAssetAnalysis.json:若分析组合基金，则输入相应组合，占比之和相加需为100%
 5 input/RelativeAnalysis.json:若分析相关性，则输入每对输合
