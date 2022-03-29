@@ -16,4 +16,7 @@ public class ConstantParameter {
     public static final int QUARTER_BASE = 0;
     //Year invalid is 999.
     public static final int YEAR_INVALID = 999;
+    //Asset property
+    public static final int STOCK = 1;
+    public static final int BOND = 2;
 }
