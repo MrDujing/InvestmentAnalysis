@@ -21,124 +21,48 @@ public class FundPositionCrawl {
 
     private Logger logger = LoggerFactory.getLogger(FundPositionCrawl.class);
     private ArrayList<FundPositionForm> positionFormArray = new ArrayList<>();
-    private String crawlUrl;
-    private int crawlPositionQuarter;
+    private String crawlStockUrl, crawlBondUrl;
+    private int crawlStockQuarter, crawlBondQuarter;
     private int fundCode;
 
     /**
-     * Prefix of crawl url is https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&topline=30.
+     * Prefix of crawl stock url is https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&topline=30.
+     * Prefix of crawl bond url is https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=zqcc&topline=10.
      *
      * @param code
      */
     public FundPositionCrawl(int code) {
         fundCode = code;
-        crawlUrl = ConstantParameter.POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode));
+        crawlStockUrl = ConstantParameter.STOCK_POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode));
+        crawlBondUrl = ConstantParameter.BOND_POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode));
 
         //acquire lastCrawlQuarter.
         Properties properties = new PropertiesConfig("../crawldate.properties").getProperties();
-        String crawlPositionDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "FundPosition");
-        if (crawlPositionDateStr == null)
-            crawlPositionQuarter = ConstantParameter.QUARTER_INVALID;
+        String crawlStockDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "StockPosition");
+        if (crawlStockDateStr == null)
+            crawlStockQuarter = ConstantParameter.QUARTER_BASE;
         else
-            crawlPositionQuarter = new DateTransForm(crawlPositionDateStr).getQuarterCount();
+            crawlStockQuarter = new DateTransForm(crawlStockDateStr).getQuarterCount();
+
+        String crawlBondDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "BondPosition");
+        if (crawlBondDateStr == null)
+            crawlBondQuarter = ConstantParameter.QUARTER_BASE;
+        else
+            crawlBondQuarter = new DateTransForm(crawlBondDateStr).getQuarterCount();
     }
 
     public boolean crawlFundPosition() throws IOException {
         positionFormArray.clear();
 
-        //Don't crawl if last crawl quarter equal to this quarter.
-        if (crawlPositionQuarter == new DateTransForm().getQuarterCount())
-            return true;
+        //Crawl stock position from crawlStockQuarter to now, which crawlStockQuarter not include.
+        boolean stockResult = crawlAssetPosition(crawlStockQuarter,crawlStockUrl,ConstantParameter.STOCK);
+        //Crawl bond position from crawlBondQuarter to now, which crawlBondQuarter not include.
+        boolean bondResult = crawlAssetPosition(crawlBondQuarter, crawlBondUrl, ConstantParameter.BOND);
+
+        if (stockResult && bondResult && positionFormArray.size() != 0)
 
         /**
-         * First crawl,get all years from url.
-         */
-        String firstUrl = crawlUrl + ConstantParameter.YEAR_INVALID;
-        Document firstDocument = Jsoup.connect(firstUrl).timeout(3000).get();
-        String yearArrayStr = firstDocument.body().text();
-
-        Pattern yearPattern = Pattern.compile("[0-9]{4}");
-        Matcher yearMatcher = yearPattern.matcher(yearArrayStr);
-        if (yearMatcher.find() == false)
-            return true; //No position, don't need crawl.
-
-        //Crawl position of all year in while loop.
-        while (yearMatcher.find()) {
-            String year = yearMatcher.group();
-            String yearUrl = crawlUrl + year;
-
-            Document yearDocument = Jsoup.connect(yearUrl).timeout(4000).get();
-
-        }
-
-
-        /**
-         * Crawl stock position.
-         */
-        Element shareTable = firstDocument.getElementsByClass("position_shares").first();
-        Elements shareRow = shareTable.getElementsByTag("tr");
-
-        if (shareRow.size() >= 2 && shareRow.get(1).getElementsByTag("td").size() == 4) {
-            //Acquire crawl quarter.
-            Element endDate = shareTable.getElementsByClass("end_date").first();
-            Pattern endDatePattern = Pattern.compile("\\d{4}-\\d{1,2}-\\d{1,2}");
-            Matcher endDateMatcher = endDatePattern.matcher(endDate.text());
-            int lastCrawlQuarter = 0;
-            if (endDateMatcher.find())
-                lastCrawlQuarter = new DateTransForm(endDateMatcher.group(0)).getQuarterCount();
-            else
-                lastCrawlQuarter = new DateTransForm(endDate.text().split(" ")[1]).getQuarterCount();
-            //Initialize.
-            byte assertProperty = 0;
-            String assertCode = "", assertName = "";
-            float assetProportion = 0.0f;
-            //Acquire each property of position.
-            for (int i = 1; i < shareRow.size(); i++) {
-                Elements shareTad = shareRow.get(i).getElementsByTag("td");
-                String stockCode = shareTad.get(2).attributes().get("stockcode");
-                if ("stock".equals(stockCode.split("_")[0]))
-                    assertProperty = 1;
-                assertCode = stockCode.split("_")[1].split(" ")[0];
-                assertName = shareTad.get(0).getElementsByAttribute("title").get(0).text();
-                assetProportion = Float.parseFloat(shareTad.get(1).text().split("%")[0]) / 100;
-                positionFormArray.add(new FundPositionForm(fundCode, lastCrawlQuarter, assertProperty, assertCode, assertName, assetProportion));
-            }
-        }
-
-        /**
-         * Crawl bond position.
-         */
-        Element bondTable = firstDocument.getElementsByClass("position_bonds").first();
-        Elements bondRow = bondTable.getElementsByTag("tr");
-
-        if (bondRow.size() >= 2 && bondRow.get(1).getElementsByTag("td").size() == 3) {
-            //Acquire crawl quarter.
-            Element endDate = bondTable.getElementsByClass("end_date").first();
-            Pattern endDatePattern = Pattern.compile("\\d{4}-\\d{1,2}-\\d{1,2}");
-            Matcher endDateMatcher = endDatePattern.matcher(endDate.text());
-            int lastCrawlQuarter = 0;
-            if (endDateMatcher.find())
-                lastCrawlQuarter = new DateTransForm(endDateMatcher.group(0)).getQuarterCount();
-            else
-                lastCrawlQuarter = new DateTransForm(endDate.text().split(" ")[1]).getQuarterCount();
-            //Initialize.
-            byte assertProperty = 0;
-            String assertCode = "", assertName = "";
-            float assetProportion = 0.0f;
-            //Acquire each property of position.
-            for (int i = 1; i < bondRow.size(); i++) {
-                Elements bondTad = bondRow.get(i).getElementsByTag("td");
-                String bondCode = bondTad.get(2).attributes().get("newcode");
-                if ("ZQ".equals(bondCode.split("_")[0]))
-                    assertProperty = 2;
-                assertCode = bondCode.split("_")[1].split(" ")[0];
-                assertName = bondTad.get(0).text();
-                assetProportion = Float.parseFloat(bondTad.get(1).text().split("%")[0]) / 100;
-                positionFormArray.add(new FundPositionForm(fundCode, lastCrawlQuarter, assertProperty, assertCode, assertName, assetProportion));
-            }
-        }
-        /**
-         * Store fund position to database.
+         * Store fund position to database, and config file.
          */
         int insertFlag = 0;
         if (positionFormArray.size() > 0)
@@ -152,5 +76,99 @@ public class FundPositionCrawl {
         else
             logger.info(String.format("Don't Store %d fund position to database.", fundCode));
         return false;
+    }
+
+    /**
+     * Crawl asset position of bond or stock.
+     *
+     * @param crawlQuarter crawl position from crawlQuarter to now, which crawlQuarter not include.
+     * @param crawlUrl     crawl url.
+     * @param property     0-unknown, 1-stock, 2-bond
+     * @return true: crawl successfully.
+     * @throws IOException
+     */
+    private boolean crawlAssetPosition(int crawlQuarter, String crawlUrl, int property) throws IOException {
+        int proportionOffset;//For crawl proportion of asset.
+        if (ConstantParameter.STOCK == property)
+            proportionOffset = 3;
+        else if (ConstantParameter.BOND == property)
+            proportionOffset = 2;
+        else
+            return false;//Just crawl bond or stock.
+        //Only can crawl asset position up to last quarter.
+        //There are no position date of this quarter.
+        if (crawlQuarter + 1 == new DateTransForm().getQuarterCount())
+            return true;
+
+        //First crawl,get all years from url.
+        String firstUrl = crawlUrl + ConstantParameter.YEAR_INVALID;
+        Document firstDocument = Jsoup.connect(firstUrl).timeout(3000).get();
+        String yearArrayStr = firstDocument.body().text();
+
+        Pattern yearPattern = Pattern.compile("[0-9]{4}");
+        Matcher yearMatcher = yearPattern.matcher(yearArrayStr);
+        if (yearMatcher.find() == false)
+            return true; //No position, don't need crawl.
+
+        //Crawl position of all year in while loop.
+        //endFlag = true, only crawl position from crawlQuarter to now;
+        boolean endFlag = false;
+        do {
+            if (endFlag)
+                break;
+
+            String year = yearMatcher.group();
+            String yearUrl = crawlUrl + year;
+
+            Document yearDocument = Jsoup.connect(yearUrl).timeout(4000).get();
+            //Crawl quarter position of this year.
+            Elements quarterDiv = yearDocument.getElementsByClass("box");
+            if (quarterDiv.size() < 1)
+                continue;
+
+            //Crawl each quarter.
+            for (Element quarter : quarterDiv) {
+                //First crawl position date, compare with crawlQuarter.
+                Pattern datePattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
+                Matcher dateMatcher = datePattern.matcher(quarter.text());
+                if (dateMatcher.find() == false) {
+                    logger.error(String.format("Invalid date format of %s ", yearUrl));
+                    return false;
+                }
+                String positionDate = dateMatcher.group();
+                int positionQuarter = new DateTransForm(positionDate).getQuarterCount();
+                if (positionQuarter <= crawlQuarter) {
+                    endFlag = true;
+                    break;
+                }
+
+                //Crawl asset position.
+                Element assetTable = quarter.getElementsByTag("table").first().getElementsByTag("tbody").first();
+                Elements assetRows = assetTable.getElementsByTag("tr");
+                for (Element asset : assetRows) {
+                    int count = asset.getElementsByTag("td").size();
+                    String assetCode = asset.getElementsByTag("td").get(1).text();
+                    String assetName = asset.getElementsByTag("td").get(2).text();
+                    String assetProportionStr = asset.getElementsByTag("td").get(count - proportionOffset).text();
+                    Pattern proportionPattern = Pattern.compile("[0-9]+[\\.]?[0-9]*");
+                    Matcher proportionMatcher = proportionPattern.matcher(assetProportionStr);
+                    if (proportionMatcher.find() == false) {
+                        logger.error(String.format("Invalid format of %s proportion, url is %s, date is %s", assetName, yearUrl, positionDate));
+                        return false;
+                    }
+                    float assetProportion = Float.parseFloat(proportionMatcher.group());
+                    //Insert into array.
+                    FundPositionForm form = new FundPositionForm(fundCode, positionQuarter, property, assetCode, assetName, assetProportion);
+                    positionFormArray.add(form);
+                    /**
+                     * Crawl info of each asset, which implement later.
+                     * Bond position don't have assetUrl.
+                     */
+                    //TODO: 20220328.
+                    //String assetUrl = "https:" + asset.getElementsByTag("td").get(1).getElementsByTag("a").attr("href");
+                }
+            }
+        } while (yearMatcher.find());
+        return true;
     }
 }
