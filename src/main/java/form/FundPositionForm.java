@@ -3,7 +3,7 @@ package form;
 public class FundPositionForm {
     private int fundCode;
     private int quarter;//quarter count from 2000-01-01, 2000/1/1-2000/3/31 correspond to quarter 0.
-    private byte assetProperty;//0:Unknown; 1-Stock; 2-Bond.
+    private int assetProperty;//0:Unknown; 1-Stock; 2-Bond.
     private String assetCode;//
     private String assetName;//Stock or Bond;
     private float assetProportion;//Proportion of Stock or Bond.
@@ -11,7 +11,7 @@ public class FundPositionForm {
     //Forbid default constructor, form must be assigned explicitly.
     private FundPositionForm() {}
 
-    public FundPositionForm(int code, int quarter, byte property, String assetCode, String name, float proportion) {
+    public FundPositionForm(int code, int quarter, int property, String assetCode, String name, float proportion) {
         fundCode = code;
         this.quarter = quarter;
         assetProperty = property;
@@ -40,7 +40,7 @@ public class FundPositionForm {
         return assetProperty;
     }
 
-    public void setAssetProperty(byte assetProperty) {
+    public void setAssetProperty(int assetProperty) {
         this.assetProperty = assetProperty;
     }
 
