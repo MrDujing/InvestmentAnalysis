@@ -10,6 +10,8 @@ import util.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +25,7 @@ public class FundPositionCrawl {
     private ArrayList<FundPositionForm> positionFormArray = new ArrayList<>();
     private String crawlStockUrl, crawlBondUrl;
     private int crawlStockQuarter, crawlBondQuarter;
+    private String recentPositionQuarterStock, recentPositionQuarterBond;
     private int fundCode;
 
     /**
@@ -55,27 +58,36 @@ public class FundPositionCrawl {
         positionFormArray.clear();
 
         //Crawl stock position from crawlStockQuarter to now, which crawlStockQuarter not include.
-        boolean stockResult = crawlAssetPosition(crawlStockQuarter,crawlStockUrl,ConstantParameter.STOCK);
+        boolean stockResult = crawlAssetPosition(crawlStockQuarter, crawlStockUrl, ConstantParameter.STOCK);
         //Crawl bond position from crawlBondQuarter to now, which crawlBondQuarter not include.
         boolean bondResult = crawlAssetPosition(crawlBondQuarter, crawlBondUrl, ConstantParameter.BOND);
 
-        if (stockResult && bondResult && positionFormArray.size() != 0)
+        if (stockResult && bondResult && positionFormArray.size() >= 0) {
+            if (positionFormArray.size() == 0) {
+                logger.info(String.format("Don't have any position need to be crawled, "));
+                return true;
+            }
 
-        /**
-         * Store fund position to database, and config file.
-         */
-        int insertFlag = 0;
-        if (positionFormArray.size() > 0)
-            insertFlag = new FundPositionDao().insertFundPosition(positionFormArray);
-        else
-            logger.info(String.format("%d fund position is zero", fundCode));
-        //Store lastCrawlDate to crawldate.properties.
-        if (insertFlag == 0)
-            ;
-            // new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "FundPosition", new DateTransForm().getDateStr());
-        else
-            logger.info(String.format("Don't Store %d fund position to database.", fundCode));
-        return false;
+            //Store fund position into database.
+            int insertRows = new FundPositionDao().insertFundPosition(positionFormArray);
+            if (insertRows >= 0) {
+                logger.info(String.format("Store %d position into database, insert rows are %d", fundCode, insertRows));
+            } else {
+                logger.warn(String.format("Crawl fund position failed, fund %d", fundCode));
+                return false;//Crawl asset position failed.
+            }
+
+            //Store crawl quarter into crawldate.properties.
+            Map<String,String> crawlDate = new HashMap<>();
+            crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "StockPosition", recentPositionQuarterStock);
+            crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "BondPosition", recentPositionQuarterBond);
+            //TODO
+            new PropertiesConfig("../crawldate.properties").updateProperties(crawlDate);
+            return true;
+        } else {
+            logger.warn(String.format("Crawl fund position failed, fund %d", fundCode));
+            return false;//Crawl asset position failed.
+        }
     }
 
     /**
@@ -112,7 +124,8 @@ public class FundPositionCrawl {
 
         //Crawl position of all year in while loop.
         //endFlag = true, only crawl position from crawlQuarter to now;
-        boolean endFlag = false;
+        //recentQuarter=true, select most recent quarter of position.
+        boolean endFlag = false, recentQuarter = true;
         do {
             if (endFlag)
                 break;
@@ -137,6 +150,23 @@ public class FundPositionCrawl {
                 }
                 String positionDate = dateMatcher.group();
                 int positionQuarter = new DateTransForm(positionDate).getQuarterCount();
+                //Record recent quarter of position, would be write into config file.
+                if (recentQuarter) {
+                    switch (property) {
+                        case ConstantParameter.STOCK:
+                            recentPositionQuarterStock = positionDate;
+                            break;
+                        case ConstantParameter.BOND:
+                            recentPositionQuarterBond = positionDate;
+                            break;
+                        default:
+                            break;
+
+                    }
+                    recentQuarter = false;
+                }
+                //Don't crawl if have crawled before.
+                //crawlQuarter:last crawl date; positionQuarter: this crawl date.
                 if (positionQuarter <= crawlQuarter) {
                     endFlag = true;
                     break;

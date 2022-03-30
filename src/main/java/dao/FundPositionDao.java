@@ -81,7 +81,7 @@ public class FundPositionDao {
 
         try {
             while (rs.next()) {
-                positionForm = new FundPositionForm(rs.getInt("fund_code"), rs.getInt("quarter"), rs.getByte("asset_property"),
+                positionForm = new FundPositionForm(rs.getInt("fund_code"), rs.getInt("quarter"), rs.getInt("asset_property"),
                         rs.getString("asset_code"), rs.getString("asset_name"), rs.getFloat("asset_proportion"));
                 positionArray.add(positionForm);
             }
