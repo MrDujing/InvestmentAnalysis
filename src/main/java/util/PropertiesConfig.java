@@ -41,7 +41,8 @@ public class PropertiesConfig {
         for(Map.Entry<String, String> entry : propertiesPair.entrySet()) {
             properties.setProperty(entry.getKey(), entry.getValue());
         }
-        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+        String writeFile = PropertiesConfig.class.getResource(fileName).getPath();
+        try (FileOutputStream fos = new FileOutputStream(writeFile)) {
             properties.store(fos, LocalDate.now().toString());
         } catch (IOException e) {
             logger.error("Open {} failed", fileName);

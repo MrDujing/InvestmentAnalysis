@@ -1,6 +1,5 @@
 package crawl;
 
-import dao.FundValueDao;
 import form.FundValueForm;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,93 +12,114 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 
 public class FundValueCrawl {
     private Logger logger = LoggerFactory.getLogger(FundValueCrawl.class);
-    public ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
-    private int lastCrawlDate;//Crawl fund history value: [lastCrawlDate, now).
-    private String preCrawlUrl;
+    private ArrayList<FundValueForm> fundHistoryValueArray = new ArrayList<>();
+    private int crawlValueDate;//Crawl fund history value: (crawlValueDate, now].
+    private String historyValueDate;
     private int fundCode;
+    private String crawlValueUrlPrefix;
 
-    public FundValueCrawl(String url, int code) {
-        fundCode = code;
+    public FundValueCrawl(int fundCode) {
+        this.fundCode = fundCode;
 
-        //acquire lastCrawlDate.
-        Properties properties = new PropertiesConfig("crawldate.properties").getProperties();
-        String crawlDateStr = properties.getProperty(FundCodeTransfer.transferToStr(code) + "HistoryValue");
+        //acquire crawlValueDate.
+        Properties properties = new PropertiesConfig("../crawldate.properties").getProperties();
+        String crawlValueDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue");
 
-        //Crawl date :[lastCrawlDate, Today).
-        if (null == crawlDateStr) {
-            lastCrawlDate = 0;
-            preCrawlUrl = url + "&code=" + FundCodeTransfer.transferToStr(fundCode) +
-                    "&sdate=" +
-                    "&edate=" + new DateTransForm().getYesterdayStr();
-        } else {
-            lastCrawlDate = new DateTransForm(crawlDateStr).getDateCount();
-            preCrawlUrl = url + "&code=" + FundCodeTransfer.transferToStr(fundCode) +
-                    "&sdate=" + new DateTransForm(crawlDateStr).getDateStr() +
-                    "&edate=" + new DateTransForm().getYesterdayStr();
-        }
+        if (crawlValueDateStr != null)
+            crawlValueDate = new DateTransForm(crawlValueDateStr).getDateCount();
+        else
+            crawlValueDate = ConstantParameter.DATE_BASE + 1;
+        //Crawl date :(crawlValueDate, Today].
+        String code = FundCodeTransfer.transferToStr(fundCode);
+        String sdate = new DateTransForm(crawlValueDate - 1).getDateStr();
+        crawlValueUrlPrefix = ConstantParameter.VALUE_CRAWL_URL_PREFIX + String.format("&code=%s&sdate=%s", code, sdate);
     }
 
-    public FundValueCrawl(int code) {
-        this(ConstantParameter.VALUE_CRAWL_URL_PREFIX, code);
-    }
 
     /**
-     * Crawl fund history value between [lastCrawlDate, today) by preCrawlUrl.
+     * Crawl fund history value between (crawlValueDate, today].
      *
      * @throws IOException
      */
-    public void crawlFundHistory() throws IOException {
+    public boolean crawlFundHistory() throws IOException {
         fundHistoryValueArray.clear();
-        int totalPages = 0, currentPage = 1;
-
-        do {
-            String crawlUrl = preCrawlUrl + "&page=" + currentPage;
-            Document pageDocument = Jsoup.connect(crawlUrl).timeout(5000).get();
-            //Acquire total pages, need to be crawled.
-            if (currentPage == 1) {
-                String pageText = pageDocument.body().text();
-                Pattern pagePattern = Pattern.compile(",pages:(\\d+),");
-                Matcher pageMatcher = pagePattern.matcher(pageText);
-                if (pageMatcher.find())
-                    totalPages = Integer.parseInt(pageMatcher.group(1));
-                else
-                    //50years * 366days / 49 + 1= totalPages.
-                    totalPages = 50 * 366 / 49 + 1;
+        int totalPages = -1;
+        /**
+         * Retrieve total pages of fund history value.
+         */
+        String firstUrl = crawlValueUrlPrefix + String.format("&page=%d", ConstantParameter.DATE_INVALID);
+        Document firstDocument = Jsoup.connect(firstUrl).timeout(10000).get();
+        String firstText = firstDocument.body().text();
+        Pattern pagePattern = Pattern.compile("pages:([0-9]+)");
+        Matcher pageMatcher = pagePattern.matcher(firstText);
+        if (pageMatcher.find()) {
+            totalPages = Integer.parseInt(pageMatcher.group(1));//Retrieve total pages.
+            if (totalPages <= 0) {
+                logger.info("Don't have history value need to crawl, fund is {}, url is {}", fundCode, firstUrl);
+                return true;
             }
-            if (totalPages == 0)
-                return;
+        } else {
+            logger.error("No total page, fund is {}, url is {}", fundCode, firstUrl);
+            return false;
+        }
+
+        /**
+         * Crawl history value from [1, totalPages].
+         */
+        //historyFlag=true, record recent date of history value, which would be wrote into config file.
+
+        boolean historyFlag = true;
+        for (int page = 1; page <= totalPages; page++) {
+            String crawlUrl = crawlValueUrlPrefix + String.format("&page=%d", page);
+            Document pageDocument = Jsoup.connect(crawlUrl).timeout(10000).get();
 
             //Crawl fund history value.
-            Element pageTable = pageDocument.getElementsByClass("w782 comm lsjz").first();
-            Elements pageRows = pageTable.select("tr");
-            for (int i = 1; i < pageRows.size(); i++) {
-                Element row = pageRows.get(i);
-                String historyValueDate = row.child(0).text();
-                int assetProperty = 1;//Fund.
-                float netValue = Float.parseFloat(row.child(1).text());
-                float totalValue;
-                if (row.child(2).text().equals(""))
-                    totalValue = netValue;
-                else
-                    totalValue = Float.parseFloat(row.child(2).text());
-                String dayIncreaseRateStr = row.child(3).text();
-                float dayIncreaseRate = (!dayIncreaseRateStr.contains("%")) ? 0 : Float.parseFloat(dayIncreaseRateStr.split("%")[0]) / 100;
-               // fundHistoryValueArray.add(new FundValueForm(fundCode, new DateTransForm(historyValueDate).getDateCount(), assetProperty, netValue, totalValue, dayIncreaseRate));
+            Element pageTable = pageDocument.body().getElementsByTag("table").first().getElementsByTag("tbody").first();
+            Elements pageRows = pageTable.getElementsByTag("tr");
+            //Extract each row.
+            for (Element row : pageRows) {
+                //Crawl each row.
+                String valueDate = row.getElementsByTag("td").get(0).text();
+                String netValueStr = row.getElementsByTag("td").get(1).text();
+                String totalValueStr = row.getElementsByTag("td").get(2).text();
+                String increaseRateStr = row.getElementsByTag("td").get(3).text();
+                //Judge each data.
+                String valueMatch = "^\\d*\\.?\\d+$", rateMatch = "^-?\\d*\\.?\\d+%$";
+                if (netValueStr.matches(valueMatch) && totalValueStr.matches(valueMatch) && increaseRateStr.matches(rateMatch)) {
+                    //Parse crawl data.
+                    float netValue = Float.parseFloat(netValueStr);
+                    float totalValue = Float.parseFloat(totalValueStr);
+                    Pattern ratePattern = Pattern.compile("(-?\\d*\\.?\\d+)%");
+                    Matcher rateMatcher = ratePattern.matcher(increaseRateStr);
+                    float dayIncreaseRate;
+                    if (rateMatcher.find()) {
+                        dayIncreaseRate = Float.parseFloat(rateMatcher.group(1));
+                    } else {
+                        logger.info("Don't crawl invalid data, fund is {}, date is {}", fundCode, valueDate);
+                        continue;
+                    }
+                    //Record the most recent date, write into config file.
+                    if (historyFlag) {
+                        historyValueDate = valueDate;
+                        historyFlag = false;
+                    }
+                    //Store into array.
+                    FundValueForm form = new FundValueForm(fundCode, new DateTransForm(valueDate).getDateCount(), netValue, totalValue, dayIncreaseRate);
+                    fundHistoryValueArray.add(form);
+                } else {
+                    logger.info("Don't crawl invalid data, fund is {}, date is {}", fundCode, valueDate);
+                    continue;
+                }
             }
-        } while (totalPages > currentPage++);
-
-        //Store history value to database.
-       // boolean insertFlag = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
-        //Store lastCrawlDate to crawldate.properties.
-        if (false);
-           // new PropertiesConfig("crawldate.properties").updateProperties(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", new DateTransForm().getDateStr());
-        else
-            logger.info(String.format("Store %d history value to database failed", fundCode));
+        }
+        //TODO 20220330, store into database, store into crawldate.properties.
+        return true;
     }
 }

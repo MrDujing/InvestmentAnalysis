@@ -81,7 +81,6 @@ public class FundPositionCrawl {
             Map<String,String> crawlDate = new HashMap<>();
             crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "StockPosition", recentPositionQuarterStock);
             crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "BondPosition", recentPositionQuarterBond);
-            //TODO
             new PropertiesConfig("../crawldate.properties").updateProperties(crawlDate);
             return true;
         } else {
@@ -114,7 +113,7 @@ public class FundPositionCrawl {
 
         //First crawl,get all years from url.
         String firstUrl = crawlUrl + ConstantParameter.YEAR_INVALID;
-        Document firstDocument = Jsoup.connect(firstUrl).timeout(3000).get();
+        Document firstDocument = Jsoup.connect(firstUrl).timeout(10000).get();
         String yearArrayStr = firstDocument.body().text();
 
         Pattern yearPattern = Pattern.compile("[0-9]{4}");
@@ -133,7 +132,7 @@ public class FundPositionCrawl {
             String year = yearMatcher.group();
             String yearUrl = crawlUrl + year;
 
-            Document yearDocument = Jsoup.connect(yearUrl).timeout(4000).get();
+            Document yearDocument = Jsoup.connect(yearUrl).timeout(10000).get();
             //Crawl quarter position of this year.
             Elements quarterDiv = yearDocument.getElementsByClass("box");
             if (quarterDiv.size() < 1)

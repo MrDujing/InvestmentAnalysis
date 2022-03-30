@@ -47,11 +47,6 @@ public class DateTransForm {
         return dateStr;
     }
 
-    @Deprecated
-    public String getYesterdayStr() {
-        return dateLocalDate.minusDays(1).toString();
-    }
-
     /**
      * Count quarter count from 2000-01-01, 2000/1/1-2000/3/31 correspond to quarter 0.
      * @return Quarter count.
