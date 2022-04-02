@@ -22,7 +22,7 @@ public class HikariCPDataSource {
     private static final Logger logger = LoggerFactory.getLogger(HikariCPDataSource.class);
 
     static {
-        prop = new PropertiesConfig("../config.properties").getProperties();
+        prop = new PropertiesConfig("../config.properties",true).getProperties();
         config.setJdbcUrl(prop.getProperty("DB_URL"));
         config.setUsername(prop.getProperty("DB_USER"));
         config.setPassword(prop.getProperty("DB_PASSWORD"));

@@ -1,6 +1,7 @@
 package crawl;
 
 import form.FundValueForm;
+import dao.FundValueDao;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,6 +10,8 @@ import util.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,16 +32,16 @@ public class FundValueCrawl {
         this.fundCode = fundCode;
 
         //acquire crawlValueDate.
-        Properties properties = new PropertiesConfig("../crawldate.properties").getProperties();
+        Properties properties = new PropertiesConfig("./config/crawldate.properties", false).getProperties();
         String crawlValueDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue");
 
         if (crawlValueDateStr != null)
             crawlValueDate = new DateTransForm(crawlValueDateStr).getDateCount();
         else
-            crawlValueDate = ConstantParameter.DATE_BASE + 1;
+            crawlValueDate = ConstantParameter.DATE_BASE - 1;
         //Crawl date :(crawlValueDate, Today].
         String code = FundCodeTransfer.transferToStr(fundCode);
-        String sdate = new DateTransForm(crawlValueDate - 1).getDateStr();
+        String sdate = new DateTransForm(crawlValueDate + 1).getDateStr();
         crawlValueUrlPrefix = ConstantParameter.VALUE_CRAWL_URL_PREFIX + String.format("&code=%s&sdate=%s", code, sdate);
     }
 
@@ -119,7 +122,25 @@ public class FundValueCrawl {
                 }
             }
         }
-        //TODO 20220330, store into database, store into crawldate.properties.
-        return true;
+        /**
+         * Store fund history value into database.
+         */
+        int insertRows = new FundValueDao().insertFundHistoryValue(fundHistoryValueArray);
+        if (insertRows > 0) {
+            logger.info("Succeed, Fund {}, crawl history value {} , store into database {}", fundCode, fundHistoryValueArray.size(), insertRows);
+            /**
+             * Store the most recent crawl date into crawldate.properties.
+             */
+            Map<String, String> crawlDate = new HashMap<>();
+            crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", historyValueDate);
+            new PropertiesConfig("./config/crawldate.properties", false).updateProperties(crawlDate);
+            return true;
+        } else if (insertRows == 0) {
+            logger.info("Succeed, Fund {}, crawl history value {} , and already stored into database", fundCode, fundHistoryValueArray.size());
+            return true;
+        } else {
+            logger.info("Failed, Fund {}, crawl history value {} , store into database {}", fundCode, fundHistoryValueArray.size(), insertRows);
+            return false;
+        }
     }
 }
