@@ -40,7 +40,7 @@ public class FundPositionCrawl {
         crawlBondUrl = ConstantParameter.BOND_POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode));
 
         //acquire lastCrawlQuarter.
-        Properties properties = new PropertiesConfig("../crawldate.properties").getProperties();
+        Properties properties = new PropertiesConfig("./config/crawldate.properties", false).getProperties();
         String crawlStockDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "StockPosition");
         if (crawlStockDateStr == null)
             crawlStockQuarter = ConstantParameter.QUARTER_BASE;
@@ -71,17 +71,20 @@ public class FundPositionCrawl {
             //Store fund position into database.
             int insertRows = new FundPositionDao().insertFundPosition(positionFormArray);
             if (insertRows >= 0) {
-                logger.info(String.format("Store %d position into database, insert rows are %d", fundCode, insertRows));
+                logger.info(String.format("Succeed,Store %d position into database, insert rows are %d", fundCode, insertRows));
             } else {
                 logger.warn(String.format("Crawl fund position failed, fund %d", fundCode));
                 return false;//Crawl asset position failed.
             }
 
             //Store crawl quarter into crawldate.properties.
-            Map<String,String> crawlDate = new HashMap<>();
-            crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "StockPosition", recentPositionQuarterStock);
-            crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "BondPosition", recentPositionQuarterBond);
-            new PropertiesConfig("../crawldate.properties").updateProperties(crawlDate);
+            Map<String, String> crawlDate = new HashMap<>();
+            //If don't crawl anything, then recentPositionQuarterStock/Bond will be null,so consider it.
+            if (recentPositionQuarterStock != null)
+                crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "StockPosition", recentPositionQuarterStock);
+            if (recentPositionQuarterBond != null)
+                crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "BondPosition", recentPositionQuarterBond);
+            new PropertiesConfig("./config/crawldate.properties", false).updateProperties(crawlDate);
             return true;
         } else {
             logger.warn(String.format("Crawl fund position failed, fund %d", fundCode));
