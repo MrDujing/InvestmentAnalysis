@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -17,6 +18,7 @@ public class FundPositionDao {
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
+    private static final String database = HikariCPDataSource.getDatabaseName();
 
     /**
      * Insert fund position to database.
@@ -25,7 +27,7 @@ public class FundPositionDao {
      * @return insert rows, -1 : insert failed; else insert right. With statement IGNORE INTO, insert row may less than array size;
      */
     public int insertFundPosition(ArrayList<FundPositionForm> positionArray) {
-        String insertSql = "INSERT IGNORE INTO investment_data.fund_position (fund_code, quarter, asset_property, asset_code,asset_name, asset_proportion) VALUES ";
+        String insertSql = "INSERT IGNORE INTO " + database + ".fund_position (fund_code, quarter, asset_property, asset_code,asset_name, asset_proportion) VALUES ";
         for (int i = 0; i < positionArray.size(); i++) {
             insertSql += "(" + positionArray.get(i).getFundCode() + ","
                     + positionArray.get(i).getQuarter() + ","
@@ -68,7 +70,7 @@ public class FundPositionDao {
     public ArrayList queryFundPosition(final int fundCode, final int quarter) {
         FundPositionForm positionForm = null;
         ArrayList<FundPositionForm> positionArray = new ArrayList<>();
-        String querySql = "SELECT * FROM investment_data.fund_position p WHERE p.fund_code = " + fundCode + " AND p.quarter = " + quarter;
+        String querySql = "SELECT * FROM " + database + ".fund_position p WHERE p.fund_code = " + fundCode + " AND p.quarter = " + quarter;
 
         try {
             conn = HikariCPDataSource.getConnection();

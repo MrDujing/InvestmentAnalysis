@@ -20,6 +20,7 @@ public class FundValueDao {
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
+    private static final String database = HikariCPDataSource.getDatabaseName();
 
     /**
      * insert history value of asset.
@@ -67,7 +68,7 @@ public class FundValueDao {
         String sql = "";
         //query by asset code.
         if (code > 0 && end > start && start >= 0) {
-            sql = "SELECT * FROM investment_data.fund_value h WHERE h.fund_code = " + code + " AND h.day_increase_rate <> " +
+            sql = "SELECT * FROM " + database + ".fund_value h WHERE h.fund_code = " + code + " AND h.day_increase_rate <> " +
                     ConstantParameter.RATE_INVALID
                     + " AND h.date BETWEEN " + start + " AND " + (end - 1)
                     + " ORDER BY h.date";
