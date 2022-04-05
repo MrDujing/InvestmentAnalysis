@@ -21,4 +21,6 @@ public class ConstantParameter {
     //Asset property
     public static final int STOCK = 1;
     public static final int BOND = 2;
+    //Fund base info url.
+    public static final String FUND_BASE_INFO_URL = "http://fund.eastmoney.com/js/fundcode_search.js";
 }
