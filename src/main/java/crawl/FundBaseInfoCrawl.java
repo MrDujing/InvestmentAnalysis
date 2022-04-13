@@ -1,5 +1,6 @@
 package crawl;
 
+import dao.FundBaseDao;
 import form.FundBaseForm;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,8 +14,8 @@ import util.ConstantParameter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ public class FundBaseInfoCrawl {
     private String crawlUrl;
     private CloseableHttpClient httpClient;
     private HttpGet httpGet;
+    private FundBaseDao fundBaseDao;
 
     /**
      * Crawl base info for code.
@@ -46,6 +48,7 @@ public class FundBaseInfoCrawl {
         httpGet = new HttpGet(ConstantParameter.FUND_BASE_INFO_URL);
         //Add header, pretend to be website browser.
         httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3573.0 Safari/537.36");
+        fundBaseDao = new FundBaseDao();
     }
 
     /**
@@ -87,6 +90,8 @@ public class FundBaseInfoCrawl {
             return false;
         }
 
+        //Acquire all property from database.
+        Map<String, Integer> propertyReferences = fundBaseDao.getPropertyReferenceArray();
         //Parse data string by json.
         final JSONArray baseInfoJsonArray = new JSONArray(fundBaseInfoStr);
         ArrayList<FundBaseForm> baseInfoArray = new ArrayList<>();
@@ -96,11 +101,22 @@ public class FundBaseInfoCrawl {
             int fundCode = Integer.parseInt(baseInfo.getString(0));
             String pinyinAbbr = baseInfo.getString(1);
             String fundName = baseInfo.getString(2);
-            int property = baseInfo.getString(3);
+            int property = propertyReferences.get(baseInfo.getString(3));
             String pinyinFull = baseInfo.getString(4);
-            //
+
+            FundBaseForm baseForm = new FundBaseForm(fundCode, pinyinAbbr, fundName, property, pinyinFull);
+            baseInfoArray.add(baseForm);
         }
 
+        //Store into database
+        int insertRows = fundBaseDao.insertFundBaseInfoArray(baseInfoArray);
+        if (insertRows == -1) {
+            logger.error("Insert fund base info into database failed");
+            return false;
+        } else {
+            logger.info("Crawl fund {}, insert into database {}", baseInfoArray.size(), insertRows);
+            return true;
+        }
     }
 
 

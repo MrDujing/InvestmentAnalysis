@@ -10,10 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class FundBaseDao {
     private Logger logger = LoggerFactory.getLogger(FundValueDao.class);
@@ -28,7 +25,7 @@ public class FundBaseDao {
      * @param baseInfoArray
      * @return -1: insert failed, else succeed, and return succeed rows.
      */
-    public int insertFundBaseInfoArray(Vector<FundBaseForm> baseInfoArray) {
+    public int insertFundBaseInfoArray(ArrayList<FundBaseForm> baseInfoArray) {
         //Construct insertData for all data.
         StringBuilder insertData = new StringBuilder();
         for (FundBaseForm baseInfo : baseInfoArray) {
@@ -167,6 +164,10 @@ public class FundBaseDao {
     }
 
 
+    /**
+     * Get all reference of fund property.
+     * @return
+     */
     public Map<String, Integer> getPropertyReferenceArray() {
         Map<String, Integer> referenceTable = new HashMap<>();
         String querySql = String.format("SELECT * FROM %s.reference_index", database);
@@ -175,12 +176,11 @@ public class FundBaseDao {
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = stmt.executeQuery(querySql);
             while (rs.next()) {
-                //TODO,20220405
-                referenceTable.put(rs.getString("property"), rs.getInt());
+                referenceTable.put(rs.getString("property"), rs.getInt("reference_id"));
             }
 
         } catch (SQLException e) {
-            logger.error("Failed crawl reference for {}", property);
+            logger.error("Failed crawl all property reference from database");
             e.printStackTrace();
         } finally {
             try {
@@ -192,5 +192,6 @@ public class FundBaseDao {
                 e.printStackTrace();
             }
         }
+        return referenceTable;
     }
 }
