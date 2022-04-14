@@ -11,10 +11,10 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ConstantParameter;
+import util.FundCodeTransfer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -119,5 +119,48 @@ public class FundBaseInfoCrawl {
         }
     }
 
+    /**
+     * Crawl base info of code, just crawl one info.
+     * crawl data while don't exist in database.
+     *
+     * @param code fund code.
+     * @return boolean:crawl succeed; else, crawl failed.
+     */
+    public boolean crawlFundBaseInfo(int code) {
+        String fundBaseInfoStrRaw = null;
+        //Crawl data from website.
+        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            if (response.getStatusLine().getStatusCode() == 200) {
+                //Succeed crawl fund data.
+                fundBaseInfoStrRaw = EntityUtils.toString(response.getEntity(), "utf-8");
+            } else {
+                //Failed crawl fund data.
+                logger.error("Failed,can't crawl base info of {} from {}", code, crawlUrl);
+                return false;
+            }
 
+        } catch (IOException e) {
+            logger.error("Failed, con't get response from website while crawl base info of {}", code);
+            e.printStackTrace();
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                logger.error("Failed to close httpClient while crawl base info of {}", code);
+                e.printStackTrace();
+            }
+        }
+
+        if (fundBaseInfoStrRaw == null) {
+            logger.error("Don't have info in website {}", crawlUrl);
+            return false;
+        }
+
+        //parse base info of code from response.
+        Pattern pattern = Pattern.compile(String.format(",(\\[\"(%s)\",\"([A-Z]+)\",\"([\\u4E00-\\u9FA5\\(\\)A-Z]+)\",\"([\\u4E00-\\u9FA5\\(\\)\\-A-Z]+)\",\"([A-Z]+)\"\\]),", FundCodeTransfer.transferToStr(code)));
+        Matcher matcher = pattern.matcher(fundBaseInfoStrRaw);
+        if (matcher.find()) {
+            //TODO, 20220414
+        }
+    }
 }

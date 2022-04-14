@@ -13,6 +13,6 @@ public class Test {
 
         FundPositionCrawl crawlPosition = new FundPositionCrawl(fundCode);
         crawlPosition.crawlFundPosition();*/
-new FundBaseInfoCrawl().crawlFundBaseInfoEntire();
+new FundBaseInfoCrawl().crawlFundBaseInfo(2);
     }
 }
