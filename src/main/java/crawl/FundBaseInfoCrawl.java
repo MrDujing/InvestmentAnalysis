@@ -8,6 +8,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ConstantParameter;
@@ -160,7 +161,32 @@ public class FundBaseInfoCrawl {
         Pattern pattern = Pattern.compile(String.format(",(\\[\"(%s)\",\"([A-Z]+)\",\"([\\u4E00-\\u9FA5\\(\\)A-Z]+)\",\"([\\u4E00-\\u9FA5\\(\\)\\-A-Z]+)\",\"([A-Z]+)\"\\]),", FundCodeTransfer.transferToStr(code)));
         Matcher matcher = pattern.matcher(fundBaseInfoStrRaw);
         if (matcher.find()) {
-            //TODO, 20220414
+            String findResult = matcher.group(1);
+            if (findResult == null) {
+                logger.error("Failed, regex parse failed ,can't find base info of {}", code);
+                return false;
+            }
+
+            //Acquire all property from database.
+            Map<String, Integer> propertyReferences = fundBaseDao.getPropertyReferenceArray();
+
+            //Parse json from findResult.
+            JSONArray baseInfoObject = new JSONArray(findResult);
+            int fundCode = Integer.parseInt(baseInfoObject.getString(0));
+            String pinyinAbbr = baseInfoObject.getString(1);
+            String fundName = baseInfoObject.getString(2);
+            int property = propertyReferences.get(baseInfoObject.getString(3));
+            String pinyinFull = baseInfoObject.getString(4);
+
+            FundBaseForm baseForm = new FundBaseForm(fundCode, pinyinAbbr, fundName, property, pinyinFull);
+            int insertResult = fundBaseDao.insertFundBaseInfoSingle(baseForm);
+            if (insertResult != -1) {
+                logger.info("Succeed, crawl {} base info, and insert database succeed", code);
+            } else {
+                logger.error("Failed, insert into database failed, code is {}, insert row is {}", code, insertResult);
+                return false;
+            }
         }
+        return true;
     }
 }

@@ -64,10 +64,10 @@ public class FundBaseDao {
         //Check if baseInfo exist in database.
         FundBaseForm queryResult = queryFundBaseInfo(fundCode);
         //if exist
-        String insertSql = String.format("INSERT REPLACE INTO %s.fund_base_info (fund_code, name_pinyin_abbr, fund_name, fund_property, name_pinyin_full) " +
-                "VALUES (%d, %s, %s, %d ,%s)", database, fundCode, namePinyinAbbr, fundName, property, namePinyinFull);
+        String insertSql = String.format("REPLACE INTO %s.fund_base_info (fund_code, name_pinyin_abbr, fund_name, fund_property, name_pinyin_full) " +
+                "VALUES (%d, \"%s\", \"%s\", %d ,\"%s\")", database, fundCode, namePinyinAbbr, fundName, property, namePinyinFull);
         if (queryResult != null)
-            logger.info("%d info exist, name is %s, property is %d, all the info will be replaced", fundCode, fundName, property);
+            logger.info("{} info exist, name is {}, property is {}, all the info will be replaced", fundCode, fundName, property);
         //insert into database, replaced old info if exist.
         int insertRows = -1;
         try {
