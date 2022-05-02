@@ -1,7 +1,7 @@
 /*
  Navicat MySQL Data Transfer
 
- Source Server         : bob
+ Source Server         : *
  Source Server Type    : MySQL
  Source Server Version : 80021
  Source Host           : *.*.*.*:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80021
  File Encoding         : 65001
 
- Date: 31/03/2022 10:15:16
+ Date: 02/05/2022 22:02:21
 */
 
 SET NAMES utf8mb4;
@@ -40,10 +40,13 @@ DROP TABLE IF EXISTS `fund_base_info`;
 CREATE TABLE `fund_base_info`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
   `fund_code` mediumint(6) UNSIGNED ZEROFILL NOT NULL COMMENT '基金代码',
+  `name_pinyin_abbr` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称缩写，英文首字母',
   `fund_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '基金名称',
+  `fund_property` tinyint UNSIGNED NOT NULL COMMENT '基金属性',
+  `name_pinyin_full` varchar(60) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称全拼，英文全拼',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `fund_code_index`(`fund_code`) USING BTREE COMMENT '对基金代码进行排序'
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 16392 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for fund_position
@@ -60,7 +63,7 @@ CREATE TABLE `fund_position`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `fund_quarter`(`fund_code`, `quarter`, `asset_code`) USING BTREE COMMENT '基金季度持仓唯一性索引',
   INDEX `fund_code_index`(`fund_code`) USING BTREE COMMENT '对基金代码进行排序'
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4667 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for fund_value
@@ -76,7 +79,7 @@ CREATE TABLE `fund_value`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `fund_date`(`fund_code`, `date`) USING BTREE COMMENT '基金每日净值唯一性索引',
   INDEX `fund_code_index`(`fund_code`) USING BTREE COMMENT '以基金代码进行排序'
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 28662 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for index_base_info
@@ -133,6 +136,18 @@ CREATE TABLE `manager_fund`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Table structure for reference_index
+-- ----------------------------
+DROP TABLE IF EXISTS `reference_index`;
+CREATE TABLE `reference_index`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '唯一标识码',
+  `reference_id` tinyint UNSIGNED NOT NULL COMMENT '参考标识码',
+  `property` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '属性名称',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `reference_unique`(`reference_id`, `property`) USING BTREE COMMENT '参考值唯一性'
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for stock_base_info
 -- ----------------------------
 DROP TABLE IF EXISTS `stock_base_info`;
@@ -141,6 +156,7 @@ CREATE TABLE `stock_base_info`  (
   `stock_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '股票代码,含美股/港股/德股',
   `company_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '公司名称',
   `company_industry` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '公司所属行业',
+  `stock_type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '证券类型',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `stock_code_index`(`stock_code`) USING BTREE COMMENT '按股票代码排序'
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
