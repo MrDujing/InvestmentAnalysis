@@ -179,14 +179,7 @@ public class FundPositionCrawl {
                 Elements assetRows = assetTable.getElementsByTag("tr");
                 for (Element asset : assetRows) {
                     int count = asset.getElementsByTag("td").size();
-                    String assetCodeTemp = asset.getElementsByTag("td").get(1).text();
-                    //Cut assetCode by dot.
-                    String assetCode = null;
-                    if (assetCodeTemp.indexOf(".") > -1) {
-                        assetCode = assetCodeTemp.split(".")[0];
-                    } else {
-                        assetCode = assetCodeTemp;
-                    }
+                    String assetCode = asset.getElementsByTag("td").get(1).text();
                     String assetName = asset.getElementsByTag("td").get(2).text();
                     String assetProportionStr = asset.getElementsByTag("td").get(count - proportionOffset).text();
                     Pattern proportionPattern = Pattern.compile("[0-9]+[\\.]?[0-9]*");

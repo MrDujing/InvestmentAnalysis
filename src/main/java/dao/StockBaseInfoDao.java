@@ -4,7 +4,6 @@ import form.StockBaseInfoForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HikariCPDataSource;
-import util.StockType;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,11 +54,50 @@ public class StockBaseInfoDao {
 
     /**
      * Insert base info to database.
+     *
      * @return true: insert succeed, else false.
      */
-    public boolean insertStockBaseInfo(String code, StockType type) {
-        //TODO.20220502
+    public boolean insertStockBaseInfo(StockBaseInfoForm infoForm) {
+        String code = infoForm.getStockCode();
+        //Query if exist in database or not.
+        String querySql = String.format("SELECT * FROM %s.stock_base_info t WHERE t.stock_code = %s", database, code);
+        try {
+            conn = HikariCPDataSource.getConnection();
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            rs = stmt.executeQuery(querySql);
+
+            if (rs.next()) {
+                String name = rs.getString("company_name");
+                String industry = rs.getString("company_industry");
+                String type = rs.getString("stock_type");
+                if (name == infoForm.getCompanyName() && industry == infoForm.getCompanyIndustry() && type == infoForm.getStockType()) {
+                    logger.info("Base info of {} is already exist in database", code);
+                    return true;
+                }
+            }
+
+            //if not exist ,or need to be update.
+            String insertSql = String.format("REPLACE INTO %s.stock_base_info (stock_code, company_name, company_industry, stock_type) " +
+                    "VALUES (\"%s\", \"%s\", \"%s\", \"%s\")", database, code, infoForm.getCompanyName(), infoForm.getCompanyIndustry(), infoForm.getStockType());
+
+            int insertRows = stmt.executeUpdate(insertSql);
+            if (insertRows == 0) {
+                logger.error("Failed to insert base info of {} into database. ", code);
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("Insert base info of {} into database failed", code);
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+                stmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                logger.error("Close database resources failed, code is {} ", code);
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
-
-
 }

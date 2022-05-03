@@ -23,4 +23,8 @@ public class ConstantParameter {
     public static final int BOND = 2;
     //Fund base info url.
     public static final String FUND_BASE_INFO_URL = "http://fund.eastmoney.com/js/fundcode_search.js";
+    //Company base info url.
+    public static final String HK_COMPANY_PROFILE = "https://emweb.securities.eastmoney.com/PC_HKF10/CompanyProfile/index?code=";
+    public static final String US_COMPANY_INFO = "https://emweb.eastmoney.com/pc_usf10/CompanyInfo/index?code=";
+    public static final String HS_COMPANY_SURVEY = "https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/Index?code=";
 }

@@ -1,18 +1,16 @@
 import crawl.FundBaseInfoCrawl;
 import crawl.FundPositionCrawl;
 import crawl.FundValueCrawl;
+import crawl.StockBaseInfoCrawl;
+import util.StockType;
 
 import java.io.IOException;
 
 public class Test {
     public static void main(String[] args) throws IOException {
-/*        int fundCode = 1993;
-
-        FundValueCrawl crawlValue = new FundValueCrawl(fundCode);
-        crawlValue.crawlFundHistory();
-
-        FundPositionCrawl crawlPosition = new FundPositionCrawl(fundCode);
-        crawlPosition.crawlFundPosition();*/
-new FundBaseInfoCrawl().crawlFundBaseInfo(2);
+        new StockBaseInfoCrawl("AMZN", StockType.USSTOCK).crawlBaseInfo();
+        new StockBaseInfoCrawl("03690", StockType.HKSTOCK).crawlBaseInfo();
+        new StockBaseInfoCrawl("300035", StockType.HSSTOCK).crawlBaseInfo();
+        new StockBaseInfoCrawl("600600", StockType.HSSTOCK).crawlBaseInfo();
     }
 }
