@@ -1,6 +1,5 @@
 package crawl;
 
-import dao.FundBaseDao;
 import dao.StockBaseInfoDao;
 import form.StockBaseInfoForm;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -13,14 +12,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 import util.ConstantParameter;
 import util.StockType;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.WebDriver;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +27,6 @@ public class StockBaseInfoCrawl {
     private String stockCode;
     private StockType stockType;
     private String crawlUrl = null;
-    private CloseableHttpClient httpClient;
-    private HttpGet httpGet;
 
     private StockBaseInfoCrawl() {
     }
@@ -62,11 +58,6 @@ public class StockBaseInfoCrawl {
             logger.error("crawl url is null ,can't crawl anything");
         }
 
-        httpClient = HttpClients.createDefault();
-        //Construct http get.
-        httpGet = new HttpGet(crawlUrl);
-        //Add header, pretend to be website browser.
-        httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3573.0 Safari/537.36");
     }
 
     public boolean crawlBaseInfo() throws IOException {
@@ -74,31 +65,12 @@ public class StockBaseInfoCrawl {
             logger.warn("crawl url is null ,code is {}, stock type is {}", stockCode, stockType);
             return false;
         }
-
-        //Crawl data from website.
-        Document crawlDocument = null;
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            if (response.getStatusLine().getStatusCode() == 200) {
-                //Succeed crawl base info.
-                //parse response to xml.
-                crawlDocument = Jsoup.parse(EntityUtils.toString(response.getEntity(), "utf-8"));
-            } else {
-                //Failed crawl base info.
-                logger.error("Failed, con't get base info from {}", crawlUrl);
-                return false;
-            }
-
-        } catch (IOException e) {
-            logger.error("Failed, con't get response from website");
-            e.printStackTrace();
-        } finally {
-            try {
-                httpClient.close();
-            } catch (IOException e) {
-                logger.error("Failed to close httpClient");
-                e.printStackTrace();
-            }
-        }
+        //Crawl base info by selenium driver.
+        System.setProperty("webdriver.chrome.driver","./config/chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));//Set time delay.
+        driver.manage().window().minimize();
+        driver.get(crawlUrl);
 
         //Judge document is valid.
         if (crawlDocument == null) {
