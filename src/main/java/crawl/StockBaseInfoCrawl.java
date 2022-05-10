@@ -72,7 +72,9 @@ public class StockBaseInfoCrawl {
         driver.manage().window().minimize();
         driver.get(crawlUrl);
 
+
         //Judge document is valid.
+        Document crawlDocument = null;
         if (crawlDocument == null) {
             logger.warn("Can't crawl anything from {}", crawlUrl);
             return false;
