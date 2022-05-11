@@ -22,7 +22,7 @@ public class StockBaseInfoDao {
      */
     public StockBaseInfoForm queryBaseInfo(String code) {
         StockBaseInfoForm baseInfoForm = null;
-        String querySql = String.format("SELECT * FROM %s.stock_base_info t WHERE t.stock_code = %s", database, code);
+        String querySql = String.format("SELECT * FROM %s.stock_base_info t WHERE t.stock_code = \"%s\"", database, code);
 
         try {
             conn = HikariCPDataSource.getConnection();
@@ -60,7 +60,7 @@ public class StockBaseInfoDao {
     public boolean insertStockBaseInfo(StockBaseInfoForm infoForm) {
         String code = infoForm.getStockCode();
         //Query if exist in database or not.
-        String querySql = String.format("SELECT * FROM %s.stock_base_info t WHERE t.stock_code = %s", database, code);
+        String querySql = String.format("SELECT * FROM %s.stock_base_info t WHERE t.stock_code = \"%s\"", database, code);
         try {
             conn = HikariCPDataSource.getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);

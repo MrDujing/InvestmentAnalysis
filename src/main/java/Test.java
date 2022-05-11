@@ -16,5 +16,8 @@ import java.io.IOException;
 
 public class Test {
     public static void main(String[] args) throws IOException {
+        new StockBaseInfoCrawl("000568",StockType.HSSTOCK).crawlBaseInfo();
+        new StockBaseInfoCrawl("02196",StockType.HKSTOCK).crawlBaseInfo();
+        new StockBaseInfoCrawl("FB",StockType.USSTOCK).crawlBaseInfo();
     }
 }

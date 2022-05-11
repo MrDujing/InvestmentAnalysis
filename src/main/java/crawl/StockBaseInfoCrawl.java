@@ -7,20 +7,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ConstantParameter;
 import util.StockType;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StockBaseInfoCrawl {
     private Logger logger = LoggerFactory.getLogger(StockBaseInfoCrawl.class);
@@ -36,7 +29,7 @@ public class StockBaseInfoCrawl {
         stockType = type;
         switch (type) {
             case USSTOCK:
-                crawlUrl = ConstantParameter.US_COMPANY_INFO + code;
+                crawlUrl = ConstantParameter.US_COMPANY_INFO + code + ".O";
                 break;
             case HKSTOCK:
                 crawlUrl = ConstantParameter.HK_COMPANY_PROFILE + code;
@@ -65,52 +58,61 @@ public class StockBaseInfoCrawl {
             logger.warn("crawl url is null ,code is {}, stock type is {}", stockCode, stockType);
             return false;
         }
-        //Crawl base info by selenium driver.
-        System.setProperty("webdriver.chrome.driver","./config/chromedriver.exe");
-        WebDriver driver = new ChromeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));//Set time delay.
-        driver.manage().window().minimize();
-        driver.get(crawlUrl);
-
-
-        //Judge document is valid.
-        Document crawlDocument = null;
-        if (crawlDocument == null) {
-            logger.warn("Can't crawl anything from {}", crawlUrl);
-            return false;
+        //Set crawl client
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(crawlUrl);
+        httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3573.0 Safari/537.36");
+        //Crawl stock base info.
+        String stockBaseInfoStr = null;
+        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            if (response.getStatusLine().getStatusCode() == 200) {
+                //Succeed.
+                stockBaseInfoStr = EntityUtils.toString(response.getEntity(), "utf-8");
+            } else {
+                //Failed.
+                logger.error("Failed, con't get response from {}", crawlUrl);
+                return false;
+            }
+        } catch (IOException e) {
+            logger.error("Failed, con't get response from website");
+            e.printStackTrace();
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                logger.error("Failed to close httpClient");
+                e.printStackTrace();
+            }
         }
-        Pattern validPattern = Pattern.compile("公司名称");
-        Matcher validMatcher = validPattern.matcher(crawlDocument.text());
-        if (validMatcher.find() == false) {
-            //crawlDocument is invalid.
-            logger.warn("Crawl document is invalid, url is {}, code is {}, stock type is {}", crawlUrl, stockCode, stockType);
-            return false;
-        }
 
+        if (stockBaseInfoStr == null)
+            return false;
+        //Parse json object.
+        JSONObject stockInfoJson = new JSONObject(stockBaseInfoStr);
         //Parse info from document.
         String name, industry, type;
         switch (stockType) {
             case USSTOCK:
-                Elements zqzlElementUS = crawlDocument.getElementById("div_zqzl").getElementsByTag("tr");
-                type = zqzlElementUS.get(1).getElementsByTag("td").get(1).text();
+                JSONObject zqzlUS = stockInfoJson.getJSONObject("data").getJSONArray("zqzl").getJSONObject(0);
+                type = zqzlUS.getString("SECURITYTYPE");
 
-                Elements gszlElementUS = crawlDocument.getElementById("div_gszl").getElementsByTag("tr");
-                name = gszlElementUS.get(0).getElementsByTag("td").get(1).text();
-                industry = gszlElementUS.get(2).getElementsByTag("td").get(1).text();
+                JSONObject gszlUS = stockInfoJson.getJSONObject("data").getJSONArray("gszl").getJSONObject(0);
+                name = gszlUS.getString("COMPNAME");
+                industry = gszlUS.getString("INDUSTRY");
                 break;
             case HKSTOCK:
-                Elements zqzlElementHK = crawlDocument.getElementById("tlp_data").getElementsByTag("tbody").get(0).getElementsByTag("tr");
-                type = zqzlElementHK.get(1).getElementsByTag("td").get(3).text();
+                JSONObject zqzlHK = stockInfoJson.getJSONObject("zqzl");
+                type = zqzlHK.getString("zqlx");
 
-                Elements gszlElementHK = crawlDocument.getElementById("tlp_data").getElementsByTag("tbody").get(1).getElementsByTag("tr");
-                name = gszlElementHK.get(0).getElementsByTag("td").get(1).text();
-                industry = gszlElementHK.get(2).getElementsByTag("td").get(3).text();
+                JSONObject gszlHK = stockInfoJson.getJSONObject("gszl");
+                name = gszlHK.getString("gsmc");
+                industry = gszlHK.getString("sshy");
                 break;
             case HSSTOCK:
-                Elements allElementHS = crawlDocument.getElementById("Table0").getElementsByTag("tr");
-                type = allElementHS.get(6).getElementsByTag("td").get(1).text();
-                name = allElementHS.get(0).getElementsByTag("td").get(1).text();
-                industry = allElementHS.get(6).getElementsByTag("td").get(3).text();
+                JSONObject jbzlHS = stockInfoJson.getJSONArray("jbzl").getJSONObject(0);
+                type = jbzlHS.getString("SECURITY_TYPE");
+                name = jbzlHS.getString("ORG_NAME");
+                industry = jbzlHS.getString("EM2016");
                 break;
             default:
                 type = null;
