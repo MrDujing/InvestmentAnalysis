@@ -40,7 +40,7 @@ public class FundPositionCrawl {
         crawlBondUrl = ConstantParameter.BOND_POSITION_CRAWL_URL_PREFIX + String.format("&code=%s&year=", FundCodeTransfer.transferToStr(fundCode));
 
         //acquire lastCrawlQuarter.
-        Properties properties = new PropertiesConfig("./config/crawldate.properties", false).getProperties();
+        Properties properties = new PropertiesConfig("./record/crawldate.properties", false).getProperties();
         String crawlStockDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "StockPosition");
         if (crawlStockDateStr == null)
             crawlStockQuarter = ConstantParameter.QUARTER_BASE;
@@ -84,7 +84,7 @@ public class FundPositionCrawl {
                 crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "StockPosition", recentPositionQuarterStock);
             if (recentPositionQuarterBond != null)
                 crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "BondPosition", recentPositionQuarterBond);
-            new PropertiesConfig("./config/crawldate.properties", false).updateProperties(crawlDate);
+            new PropertiesConfig("./record/crawldate.properties", false).updateProperties(crawlDate);
             return true;
         } else {
             logger.warn(String.format("Crawl fund position failed, fund %d", fundCode));

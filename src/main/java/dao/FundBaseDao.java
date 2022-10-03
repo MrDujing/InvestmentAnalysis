@@ -13,7 +13,7 @@ import java.sql.Statement;
 import java.util.*;
 
 public class FundBaseDao {
-    private Logger logger = LoggerFactory.getLogger(FundValueDao.class);
+    private Logger logger = LoggerFactory.getLogger(FundBaseDao.class);
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;

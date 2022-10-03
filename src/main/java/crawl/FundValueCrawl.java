@@ -32,7 +32,7 @@ public class FundValueCrawl {
         this.fundCode = fundCode;
 
         //acquire crawlValueDate.
-        Properties properties = new PropertiesConfig("./config/crawldate.properties", false).getProperties();
+        Properties properties = new PropertiesConfig("./record/crawldate.properties", false).getProperties();
         String crawlValueDateStr = properties.getProperty(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue");
 
         if (crawlValueDateStr != null)
@@ -133,7 +133,7 @@ public class FundValueCrawl {
              */
             Map<String, String> crawlDate = new HashMap<>();
             crawlDate.put(FundCodeTransfer.transferToStr(fundCode) + "HistoryValue", historyValueDate);
-            new PropertiesConfig("./config/crawldate.properties", false).updateProperties(crawlDate);
+            new PropertiesConfig("./record/crawldate.properties", false).updateProperties(crawlDate);
             return true;
         } else if (insertRows == 0) {
             logger.info("Succeed, Fund {}, crawl history value {} , and already stored into database", fundCode, fundHistoryValueArray.size());
