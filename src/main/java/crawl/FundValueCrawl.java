@@ -57,7 +57,7 @@ public class FundValueCrawl {
         /**
          * Retrieve total pages of fund history value.
          */
-        String firstUrl = crawlValueUrlPrefix + String.format("&page=%d", ConstantParameter.DATE_INVALID);
+        String firstUrl = crawlValueUrlPrefix + String.format("&page=%d", ConstantParameter.PAGE_INVALID);
         Document firstDocument = Jsoup.connect(firstUrl).timeout(10000).get();
         String firstText = firstDocument.body().text();
         Pattern pagePattern = Pattern.compile("pages:([0-9]+)");
