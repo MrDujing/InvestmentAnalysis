@@ -15,8 +15,8 @@ public class ConstantParameter {
     //Quarter base is 0, date base is 0.
     public static final int QUARTER_BASE = 0;
     public static final int DATE_BASE = 0;
-    //Year invalid is 99999, page invalid is 99999.
-    public static final int YEAR_INVALID = 99999;
+    //Year invalid is 999, page invalid is 99999.
+    public static final int YEAR_INVALID = 999;
     public static final int PAGE_INVALID = 99999;
     //Asset property
     public static final int STOCK = 1;

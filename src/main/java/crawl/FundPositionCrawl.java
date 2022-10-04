@@ -111,8 +111,10 @@ public class FundPositionCrawl {
             return false;//Just crawl bond or stock.
         //Only can crawl asset position up to last quarter.
         //There are no position date of this quarter.
-        if (crawlQuarter + 1 == new DateTransForm().getQuarterCount())
+        if (crawlQuarter + 1 == new DateTransForm().getQuarterCount()) {
+            logger.info("Don't have position to crawl, crawlQuarter {} + 1 equal to current quarter.", crawlQuarter);
             return true;
+        }
 
         //First crawl,get all years from url.
         String firstUrl = crawlUrl + ConstantParameter.YEAR_INVALID;
@@ -185,8 +187,8 @@ public class FundPositionCrawl {
                     Pattern proportionPattern = Pattern.compile("[0-9]+[\\.]?[0-9]*");
                     Matcher proportionMatcher = proportionPattern.matcher(assetProportionStr);
                     if (proportionMatcher.find() == false) {
-                        logger.error(String.format("Invalid format of %s proportion, url is %s, date is %s", assetName, yearUrl, positionDate));
-                        return false;
+                        logger.info(String.format("Invalid format of %s proportion, url is %s, date is %s", assetName, yearUrl, positionDate));
+                        continue;
                     }
                     float assetProportion = Float.parseFloat(proportionMatcher.group());
                     //Insert into array.

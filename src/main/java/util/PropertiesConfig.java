@@ -49,6 +49,7 @@ public class PropertiesConfig {
 
     /**
      * Write properties which store in HashTable to file.
+     * fileName must be absolute name.
      */
     public void updateProperties(Map<String, String> propertiesPair) {
         for (Map.Entry<String, String> entry : propertiesPair.entrySet()) {

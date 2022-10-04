@@ -34,7 +34,7 @@ public class StoreDataByFile {
      * @param builder   data by StringBuilder
      */
     private int fastInsertData(String insertSql, StringBuilder builder) {
-        int succeedRows = 0;// Record succeed rows inserted;
+        int succeedRows = -1;// Record succeed rows inserted;
         byte[] bytes = builder.toString().getBytes();
         PreparedStatement statement = null;
         try (InputStream insertDataStream = new ByteArrayInputStream(bytes)) {
