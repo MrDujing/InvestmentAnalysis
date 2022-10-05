@@ -1,9 +1,18 @@
-抓取/导入基金和指数的历史数据，存入数据库中
-对基金数据、指数进行数据分析。已将常用功能封装。
+基金、指数分析工具，主要功能如下
+[数据抓取]
+数据抓取仅用于个人兴趣，非商业用途。
+基金净值抓取：依据https://fundf10.eastmoney.com/F10DataApi.aspx；
+基金持仓股票：依据https://fundf10.eastmoney.com/FundArchivesDatas.aspx；
+基金债券持仓：依据https://fundf10.eastmoney.com/FundArchivesDatas.aspx；
+基金基本信息：依据http://fund.eastmoney.com/js/fundcode_search.js；
+美股信息：依据https://emweb.eastmoney.com/pc_usf10/CompanyInfo/PageAjax；
+沪深股：依据https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/PageAjax；
+港股：依据https://emweb.securities.eastmoney.com/PC_HKF10/CompanyProfile/PageAjax；
+沪深300指数、创业板指数、纳斯达克100、标普500：均下载自https://cn.investing.com/indices/，下载文件在input里面
 
-sql
-用于建立数据库表
-record
-记录上次抓取的时间，用于本次抓取
-input
-输入分析内容
+[数据存取]
+上述数据抓取功能见crawl包，存取功能见dao包。所有数据均会存入数据库，供使用时读取。
+
+[数据分析]
+分析模块见analysis包。主要有波动性分析、指数基金与指数的相关性分析、单位时间回撤/收益分析。
+后期会增加PE/PB分析。本人主要投资ETF，一般侧重指数ETF与对应跟踪指数的分析。
