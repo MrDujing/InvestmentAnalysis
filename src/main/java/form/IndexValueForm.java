@@ -3,7 +3,11 @@ package form;
 public class IndexValueForm {
     private String indexCode;
     private int date;
-    private float indexDayValue;
+    private float openPrice;
+    private float closePrice;
+    private float highPrice;
+    private float lowPrice;
+    private float tradeVolume;
     private float dayIncreaseRate;
 
     public String getIndexCode() {
@@ -22,12 +26,12 @@ public class IndexValueForm {
         this.date = date;
     }
 
-    public float getIndexDayValue() {
-        return indexDayValue;
+    public float getOpenPrice() {
+        return openPrice;
     }
 
-    public void setIndexDayValue(float indexDayValue) {
-        this.indexDayValue = indexDayValue;
+    public void setOpenPrice(float openPrice) {
+        this.openPrice = openPrice;
     }
 
     public float getDayIncreaseRate() {
@@ -36,5 +40,37 @@ public class IndexValueForm {
 
     public void setDayIncreaseRate(float dayIncreaseRate) {
         this.dayIncreaseRate = dayIncreaseRate;
+    }
+
+    public float getClosePrice() {
+        return closePrice;
+    }
+
+    public void setClosePrice(float closePrice) {
+        this.closePrice = closePrice;
+    }
+
+    public float getHighPrice() {
+        return highPrice;
+    }
+
+    public void setHighPrice(float highPrice) {
+        this.highPrice = highPrice;
+    }
+
+    public float getLowPrice() {
+        return lowPrice;
+    }
+
+    public void setLowPrice(float lowPrice) {
+        this.lowPrice = lowPrice;
+    }
+
+    public float getTradeVolume() {
+        return tradeVolume;
+    }
+
+    public void setTradeVolume(float tradeVolume) {
+        this.tradeVolume = tradeVolume;
     }
 }

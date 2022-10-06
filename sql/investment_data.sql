@@ -1,16 +1,17 @@
 /*
  Navicat MySQL Data Transfer
 
- Source Server         : bob
+ Source Server         : *****
  Source Server Type    : MySQL
  Source Server Version : 80021
+ Source Host           : *.*.*.*:*
  Source Schema         : investment_data
 
  Target Server Type    : MySQL
  Target Server Version : 80021
  File Encoding         : 65001
 
- Date: 18/09/2022 14:49:10
+ Date: 06/10/2022 21:31:52
 */
 
 SET NAMES utf8mb4;
@@ -15994,7 +15995,7 @@ CREATE TABLE `fund_position`  (
   `asset_proportion` float UNSIGNED NOT NULL COMMENT '持仓比例,单位%',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `fund_quarter`(`fund_code`, `quarter`, `asset_code`) USING BTREE COMMENT '基金季度持仓唯一性索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 4667 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of fund_position
@@ -16014,7 +16015,7 @@ CREATE TABLE `fund_value`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `fund_date`(`fund_code`, `date`) USING BTREE COMMENT '基金每日净值唯一性索引',
   INDEX `fund_code_index`(`fund_code`) USING BTREE COMMENT '以基金代码进行排序'
-) ENGINE = InnoDB AUTO_INCREMENT = 28662 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of fund_value
@@ -16037,14 +16038,64 @@ CREATE TABLE `index_base_info`  (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for index_value
+-- Table structure for index_value_chn
 -- ----------------------------
-DROP TABLE IF EXISTS `index_value`;
-CREATE TABLE `index_value`  (
+DROP TABLE IF EXISTS `index_value_chn`;
+CREATE TABLE `index_value_chn`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '唯一标识码',
   `index_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '指数代码',
   `date` smallint UNSIGNED NOT NULL COMMENT '指数对应的日期,2000/1/1年对应0',
-  `index_value` float UNSIGNED NOT NULL COMMENT '每日指数',
+  `open_price` float UNSIGNED NOT NULL COMMENT '开盘价',
+  `close_price` float UNSIGNED NOT NULL COMMENT '收盘价',
+  `high_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最高价',
+  `low_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最低价',
+  `trade_volume` float UNSIGNED NULL DEFAULT NULL COMMENT '交易量',
+  `day_increase_rate` float NOT NULL COMMENT '每日增长率，单位%',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `index_date`(`index_code`, `date`) USING BTREE COMMENT '指数净值唯一性索引',
+  INDEX `index_code_index`(`index_code`) USING BTREE COMMENT '对指数代码进行排序'
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of index_value_chn
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for index_value_eu
+-- ----------------------------
+DROP TABLE IF EXISTS `index_value_eu`;
+CREATE TABLE `index_value_eu`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '唯一标识码',
+  `index_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '指数代码',
+  `date` smallint UNSIGNED NOT NULL COMMENT '指数对应的日期,2000/1/1年对应0',
+  `open_price` float UNSIGNED NOT NULL COMMENT '开盘价',
+  `close_price` float UNSIGNED NOT NULL COMMENT '收盘价',
+  `high_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最高价',
+  `low_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最低价',
+  `trade_volume` float UNSIGNED NULL DEFAULT NULL COMMENT '交易量',
+  `day_increase_rate` float NOT NULL COMMENT '每日增长率，单位%',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `index_date`(`index_code`, `date`) USING BTREE COMMENT '指数净值唯一性索引',
+  INDEX `index_code_index`(`index_code`) USING BTREE COMMENT '对指数代码进行排序'
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of index_value_eu
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for index_value_usa
+-- ----------------------------
+DROP TABLE IF EXISTS `index_value_usa`;
+CREATE TABLE `index_value_usa`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '唯一标识码',
+  `index_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '指数代码',
+  `date` smallint UNSIGNED NOT NULL COMMENT '指数对应的日期,2000/1/1年对应0',
+  `open_price` float UNSIGNED NOT NULL COMMENT '开盘价',
+  `close_price` float UNSIGNED NOT NULL COMMENT '收盘价',
+  `high_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最高价',
+  `low_price` float UNSIGNED NULL DEFAULT NULL COMMENT '最低价',
+  `trade_volume` float UNSIGNED NULL DEFAULT NULL COMMENT '交易量',
   `day_increase_rate` float NOT NULL COMMENT '每日增长率，单位%',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `index_date`(`index_code`, `date`) USING BTREE COMMENT '指数净值唯一性索引',
@@ -16052,7 +16103,7 @@ CREATE TABLE `index_value`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of index_value
+-- Records of index_value_usa
 -- ----------------------------
 
 -- ----------------------------
@@ -16136,7 +16187,7 @@ CREATE TABLE `stock_base_info`  (
   `stock_type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '证券类型',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `stock_code_index`(`stock_code`) USING BTREE COMMENT '按股票代码排序'
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of stock_base_info
