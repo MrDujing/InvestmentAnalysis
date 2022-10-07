@@ -102,7 +102,7 @@ public class FundPositionCrawl {
      * @throws IOException
      */
     private boolean crawlAssetPosition(int crawlQuarter, String crawlUrl, int property) throws IOException {
-        int proportionOffset;//For crawl proportion of asset.
+        int proportionOffset = 0;//For crawl proportion of asset.
         if (ConstantParameter.STOCK == property)
             proportionOffset = 3;
         else if (ConstantParameter.BOND == property)

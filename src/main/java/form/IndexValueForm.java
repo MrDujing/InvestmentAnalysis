@@ -10,6 +10,32 @@ public class IndexValueForm {
     private float tradeVolume;
     private float dayIncreaseRate;
 
+    public IndexValueForm(String code, int date, float open, float close, float high, float low, float trade, float rate) {
+        indexCode = code;
+        this.date = date;
+        openPrice = open;
+        closePrice = close;
+        highPrice = high;
+        lowPrice = low;
+        tradeVolume = trade;
+        dayIncreaseRate = rate;
+    }
+
+    public IndexValueForm() {
+        this("", 0,0,0,0,0,0,0);
+    }
+
+    public void setValueForm(String code, int date, float open, float close, float high, float low, float trade, float rate) {
+        indexCode = code;
+        this.date = date;
+        openPrice = open;
+        closePrice = close;
+        highPrice = high;
+        lowPrice = low;
+        tradeVolume = trade;
+        dayIncreaseRate = rate;
+    }
+
     public String getIndexCode() {
         return indexCode;
     }
