@@ -1,0 +1,22 @@
+[
+  {
+    "prefix": "CNT",
+    "name": "创业板指数",
+    "lib": "index_value_chn"
+  },
+  {
+    "prefix": "CSI300",
+    "name": "沪深300指数",
+    "lib": "index_value_chn"
+  },
+  {
+    "prefix": "NDX100",
+    "name": "纳斯达克100指数",
+    "lib": "index_value_usa"
+  },
+  {
+    "prefix": "SP500",
+    "name": "标普500指数",
+    "lib": "index_value_usa"
+  }
+]
