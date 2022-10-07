@@ -1,10 +1,12 @@
 package crawl;
 
 import cn.hutool.core.io.IoUtil;
+import dao.IndexValueDao;
 import form.IndexValueForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.DateTransForm;
+import util.IndexLibraryParser;
 import util.InputValidate;
 
 import java.io.BufferedReader;
@@ -59,9 +61,25 @@ public class IndexValueCrawl {
         );
         logger.info("Extract data from {}, extract line is {}!", fileName, indexValueForms.size());
 
-        //Store into database.TODO
-        return true;//TODO
+        //Close file
+        allLines.close();
+        csvReaderUtf8.close();
+        csvFileInput.close();
+
+        //Store into database.
+        String tableName = new IndexLibraryParser().parseJson().getTableName(indexCode);
+        int insertRows = new IndexValueDao(indexCode, tableName).storeIntoDatabase(indexValueForms);
+        logger.info("Index value forms which insert into database, cnt is {}, code is {}, table is {}", insertRows, indexCode, tableName);
+        if (insertRows >= 0) {
+            File file = new File(fileName);
+            StringBuilder newName = new StringBuilder(fileName);
+            newName.insert(fileName.lastIndexOf('.'), "_read");
+            file.renameTo(new File(newName.toString()));
+            return true;
+        } else
+            return false;
     }
+    //TODO, store all csv files , from directory.
 
     private IndexValueForm parseStrFromCSV(String str) {
         Pattern pattern = Pattern.compile("\\\"(\\d{4}-\\d{1,2}-\\d{1,2})\\\",\\\"([0-9.,]+)\\\",\\\"([0-9.,]+)\\\",\\\"([0-9.,]+)\\\",\\\"([0-9.,]+)\\\",\\\"([0-9,.BKM]*)\\\",\\\"([0-9.,%-]+)\\\"");
@@ -97,7 +115,7 @@ public class IndexValueCrawl {
      * @throws ParseException
      */
     private float parseTradeVolume(String str) throws ParseException {
-        if ("" == str)
+        if ("".equals(str))
             return 0.0f;
         float number = NumberFormat.getInstance().parse(str).floatValue();
         char unit = str.charAt(str.length() - 1);
